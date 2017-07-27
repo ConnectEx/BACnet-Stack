@@ -59,23 +59,23 @@ struct integer_object {
 struct integer_object Integer_Value[MAX_INTEGER_VALUES];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Integer_Value_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Integer_Value_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
     PROP_PRESENT_VALUE,
     PROP_STATUS_FLAGS,
     PROP_UNITS,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Integer_Value_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Integer_Value_Properties_Optional[] = {
     PROP_OUT_OF_SERVICE,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Integer_Value_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Integer_Value_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 /**
@@ -90,9 +90,9 @@ static const int Integer_Value_Properties_Proprietary[] = {
  * BACnet proprietary properties for this object.
  */
 void Integer_Value_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Integer_Value_Properties_Required;
@@ -101,7 +101,6 @@ void Integer_Value_Property_Lists(
     if (pProprietary)
         *pProprietary = Integer_Value_Properties_Proprietary;
 
-    return;
 }
 
 /**
@@ -244,7 +243,7 @@ bool Integer_Value_Object_Name(
 
     index = Integer_Value_Instance_To_Index(object_instance);
     if (index < MAX_INTEGER_VALUES) {
-        sprintf(text_string, "ANALOG VALUE %lu", (unsigned long) object_instance);
+        sprintf(text_string, "INTEGER VALUE %lu", (unsigned long) object_instance);
         status = characterstring_init_ansi(object_name, text_string);
     }
 
@@ -356,7 +355,7 @@ int Integer_Value_Read_Property(
     BACNET_CHARACTER_STRING char_string;
     uint8_t *apdu = NULL;
     uint32_t units = 0;
-    int32_t integer_value = 0.0;
+    int32_t integer_value = 0 ;
     bool state = false;
 
     if ((rpdata == NULL) || (rpdata->application_data == NULL) ||

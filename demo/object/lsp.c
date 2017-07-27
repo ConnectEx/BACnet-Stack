@@ -56,7 +56,7 @@ static BACNET_LIFE_SAFETY_OPERATION
 static bool Life_Safety_Point_Out_Of_Service[MAX_LIFE_SAFETY_POINTS];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Life_Safety_Point_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Life_Safety_Point_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -70,16 +70,16 @@ static const int Life_Safety_Point_Properties_Required[] = {
     PROP_ACCEPTED_MODES,
     PROP_SILENCED,
     PROP_OPERATION_EXPECTED,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Life_Safety_Point_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Life_Safety_Point_Properties_Optional[] = {
     PROP_DESCRIPTION,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Life_Safety_Point_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Life_Safety_Point_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 /**
@@ -94,9 +94,9 @@ static const int Life_Safety_Point_Properties_Proprietary[] = {
  * BACnet proprietary properties for this object.
  */
 void Life_Safety_Point_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired) {
         *pRequired = Life_Safety_Point_Properties_Required;
@@ -108,7 +108,6 @@ void Life_Safety_Point_Property_Lists(
         *pProprietary = Life_Safety_Point_Properties_Proprietary;
     }
 
-    return;
 }
 
 void Life_Safety_Point_Init(
@@ -129,7 +128,6 @@ void Life_Safety_Point_Init(
         }
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -213,7 +211,7 @@ int Life_Safety_Point_Read_Property(
     BACNET_BIT_STRING bit_string;
     BACNET_CHARACTER_STRING char_string;
     BACNET_LIFE_SAFETY_STATE present_value = LIFE_SAFETY_STATE_QUIET;
-    BACNET_LIFE_SAFETY_MODE mode = LIFE_SAFETY_MODE_DEFAULT;
+    int mode = (int) LIFE_SAFETY_MODE_DEFAULT;
     BACNET_SILENCED_STATE silenced_state = SILENCED_STATE_UNSILENCED;
     BACNET_LIFE_SAFETY_OPERATION operation = LIFE_SAFETY_OP_NONE;
     unsigned object_index = 0;
@@ -356,7 +354,7 @@ bool Life_Safety_Point_Write_Property(
                         Life_Safety_Point_Instance_To_Index
                         (wp_data->object_instance);
                     Life_Safety_Point_Mode[object_index] =
-                        value.type.Enumerated;
+                        (BACNET_LIFE_SAFETY_MODE) value.type.Enumerated;
                 } else {
                     status = false;
                     wp_data->error_class = ERROR_CLASS_PROPERTY;
@@ -449,7 +447,6 @@ void testLifeSafetyPoint(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_LIFE_SAFETY_POINT

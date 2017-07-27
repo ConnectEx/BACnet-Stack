@@ -50,7 +50,7 @@
 ANALOG_INPUT_DESCR AI_Descr[MAX_ANALOG_INPUTS];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Properties_Required[] = {
+static const BACNET_PROPERTY_ID Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -59,10 +59,10 @@ static const int Properties_Required[] = {
     PROP_EVENT_STATE,
     PROP_OUT_OF_SERVICE,
     PROP_UNITS,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Properties_Optional[] = {
     PROP_DESCRIPTION,
     PROP_RELIABILITY,
     PROP_COV_INCREMENT,
@@ -78,20 +78,17 @@ static const int Properties_Optional[] = {
     PROP_NOTIFY_TYPE,
     PROP_EVENT_TIME_STAMPS,
 #endif
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Proprietary[] = {
-    9997,
-    9998,
-    9999,
-    -1
+static const BACNET_PROPERTY_ID Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Analog_Input_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Properties_Required;
@@ -99,8 +96,6 @@ void Analog_Input_Property_Lists(
         *pOptional = Properties_Optional;
     if (pProprietary)
         *pProprietary = Properties_Proprietary;
-
-    return;
 }
 
 
@@ -832,10 +827,10 @@ bool Analog_Input_Write_Property(
             if (status) {
                 switch ((BACNET_NOTIFY_TYPE) value.type.Enumerated) {
                     case NOTIFY_EVENT:
-                        CurrentAI->Notify_Type = 1;
+                        CurrentAI->Notify_Type = NOTIFY_EVENT;
                         break;
                     case NOTIFY_ALARM:
-                        CurrentAI->Notify_Type = 0;
+                        CurrentAI->Notify_Type = NOTIFY_ALARM ;
                         break;
                     default:
                         wp_data->error_class = ERROR_CLASS_PROPERTY;
@@ -881,8 +876,8 @@ void Analog_Input_Intrinsic_Reporting(
     BACNET_CHARACTER_STRING msgText;
     ANALOG_INPUT_DESCR *CurrentAI;
     unsigned int object_index;
-    uint8_t FromState = 0;
-    uint8_t ToState;
+    BACNET_EVENT_STATE FromState ;
+    BACNET_EVENT_STATE ToState;
     float ExceededLimit = 0.0f;
     float PresentVal = 0.0f;
     bool SendNotify = false;
@@ -1440,7 +1435,6 @@ void testAnalogInput(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_ANALOG_INPUT

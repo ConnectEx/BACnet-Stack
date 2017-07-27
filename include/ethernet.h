@@ -34,22 +34,19 @@
 #define MAX_HEADER (6+6+2+1+1+1)
 #define MAX_MPDU (MAX_HEADER+MAX_PDU)
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
-    bool ethernet_valid(
-        void);
-    void ethernet_cleanup(
-        void);
-    bool ethernet_init(
+bool ethernet_valid(
+    void);
+void ethernet_cleanup(
+    void);
+bool ethernet_init(
         char *interface_name);
 
 /* function to send a packet out the 802.2 socket */
 /* returns number of bytes sent on success, negative on failure */
     int ethernet_send_pdu(
         BACNET_ADDRESS * dest,  /* destination address */
-        BACNET_NPDU_DATA * npdu_data,   /* network information */
+        BACNET_NPCI_DATA * npci_data,   /* network information */
         uint8_t * pdu,  /* any data to be sent - may be null */
         unsigned pdu_len);      /* number of bytes of data */
 
@@ -76,7 +73,4 @@ extern "C" {
         uint8_t * mtu,
         int mtu_len);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

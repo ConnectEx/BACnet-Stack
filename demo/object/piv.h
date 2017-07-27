@@ -32,9 +32,6 @@
 #include "wp.h"
 #include "rp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
     typedef struct positiveinteger_value_descr {
         bool Out_Of_Service:1;
@@ -43,9 +40,9 @@ extern "C" {
     } POSITIVEINTEGER_VALUE_DESCR;
 
 
-    void PositiveInteger_Value_Property_Lists(const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+    void PositiveInteger_Value_Property_Lists(const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
     bool PositiveInteger_Value_Valid_Instance(uint32_t object_instance);
     unsigned PositiveInteger_Value_Count(void);
     uint32_t PositiveInteger_Value_Index_To_Instance(unsigned index);
@@ -89,7 +86,4 @@ extern "C" {
     void testPositiveInteger_Value(Test * pTest);
 #endif
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

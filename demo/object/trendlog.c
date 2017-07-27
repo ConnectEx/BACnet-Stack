@@ -53,7 +53,7 @@ TL_DATA_REC Logs[MAX_TREND_LOGS][TL_MAX_ENTRIES];
 static TL_LOG_INFO LogInfo[MAX_TREND_LOGS];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Trend_Log_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Trend_Log_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -66,10 +66,10 @@ static const int Trend_Log_Properties_Required[] = {
     PROP_EVENT_STATE,
     PROP_LOGGING_TYPE,
     PROP_STATUS_FLAGS,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Trend_Log_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Trend_Log_Properties_Optional[] = {
     PROP_DESCRIPTION,
     PROP_START_TIME,
     PROP_STOP_TIME,
@@ -93,17 +93,17 @@ static const int Trend_Log_Properties_Optional[] = {
     PROP_ALIGN_INTERVALS,
     PROP_INTERVAL_OFFSET,
     PROP_TRIGGER,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Trend_Log_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Trend_Log_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Trend_Log_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Trend_Log_Properties_Required;
@@ -112,7 +112,6 @@ void Trend_Log_Property_Lists(
     if (pProprietary)
         *pProprietary = Trend_Log_Properties_Proprietary;
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -248,7 +247,6 @@ void Trend_Log_Init(
         }
     }
 
-    return;
 }
 
 
@@ -578,7 +576,7 @@ bool Trend_Log_Write_Property(
                 &wp_data->error_class, &wp_data->error_code);
             if (status) {
                 if (value.type.Enumerated != LOGGING_TYPE_COV) {
-                    CurrentLog->LoggingType = value.type.Enumerated;
+                CurrentLog->LoggingType = (BACNET_LOGGING_TYPE)value.type.Enumerated;
                     if (value.type.Enumerated == LOGGING_TYPE_POLLED) {
                         /* As per 12.25.27 pick a suitable default if interval is 0 */
                         if (CurrentLog->ulLogInterval == 0) {
@@ -992,9 +990,9 @@ void TL_Local_Time_To_BAC(
      * Windows is days from Sunday 0 - 6 so we
      * have to adjust */
     if (TempTime->tm_wday == 0)
-        DestTime->date.wday = 7;
+        DestTime->date.wday = BACNET_WEEKDAY_SUNDAY;
     else
-        DestTime->date.wday = (uint8_t) TempTime->tm_wday;
+        DestTime->date.wday = (BACNET_WEEKDAY) (uint8_t)TempTime->tm_wday;
     DestTime->time.hour = (uint8_t) TempTime->tm_hour;
     DestTime->time.min = (uint8_t) TempTime->tm_min;
     DestTime->time.sec = (uint8_t) TempTime->tm_sec;
@@ -1725,7 +1723,7 @@ void trend_log_timer(
     time_t tNow = 0;
 
     /* unused parameter */
-    uSeconds = uSeconds;
+    (void) uSeconds ;
     /* use OS to get the current time */
     tNow = time(NULL);
     for (iCount = 0; iCount < MAX_TREND_LOGS; iCount++) {

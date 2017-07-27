@@ -65,26 +65,26 @@ void handler_get_alarm_summary(
     unsigned j = 0;
     bool error = false;
     BACNET_ADDRESS my_address;
-    BACNET_NPDU_DATA npdu_data;
+    BACNET_NPCI_DATA npci_data;
     BACNET_GET_ALARM_SUMMARY_DATA getalarm_data;
 
 
 
     /* encode the NPDU portion of the packet */
     datalink_get_my_address(&my_address);
-    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+    npdu_setup_npci_data(&npci_data, false, MESSAGE_PRIORITY_NORMAL);
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
-        &npdu_data);
+        &npci_data);
     if (service_data->segmented_message) {
         /* we don't support segmentation - send an abort */
         apdu_len =
             abort_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
-            service_data->invoke_id, ABORT_REASON_SEGMENTATION_NOT_SUPPORTED,
-            true);
+                              service_data->invoke_id, ABORT_REASON_SEGMENTATION_NOT_SUPPORTED,
+                              true);
 #if PRINT_ENABLED
         fprintf(stderr,
-            "GetAlarmSummary: Segmented message. Sending Abort!\n");
+                "GetAlarmSummary: Segmented message. Sending Abort!\n");
 #endif
         goto GET_ALARM_SUMMARY_ABORT;
     }
@@ -92,7 +92,7 @@ void handler_get_alarm_summary(
     /* init header */
     apdu_len =
         get_alarm_summary_ack_encode_apdu_init(&Handler_Transmit_Buffer
-        [pdu_len], service_data->invoke_id);
+                [pdu_len], service_data->invoke_id);
 
 
     for (i = 0; i < MAX_BACNET_OBJECT_TYPE; i++) {
@@ -103,7 +103,7 @@ void handler_get_alarm_summary(
                     len =
                         get_alarm_summary_ack_encode_apdu_data
                         (&Handler_Transmit_Buffer[pdu_len + apdu_len],
-                        service_data->max_resp - apdu_len, &getalarm_data);
+                         service_data->max_resp - apdu_len, &getalarm_data);
                     if (len <= 0) {
                         error = true;
                         goto GET_ALARM_SUMMARY_ERROR;
@@ -121,23 +121,23 @@ void handler_get_alarm_summary(
     fprintf(stderr, "GetAlarmSummary: Sending response!\n");
 #endif
 
-  GET_ALARM_SUMMARY_ERROR:
+GET_ALARM_SUMMARY_ERROR:
     if (error) {
         if (len == BACNET_STATUS_ABORT) {
             /* BACnet APDU too small to fit data, so proper response is Abort */
             apdu_len =
                 abort_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
-                service_data->invoke_id,
-                ABORT_REASON_SEGMENTATION_NOT_SUPPORTED, true);
+                                  service_data->invoke_id,
+                                  ABORT_REASON_SEGMENTATION_NOT_SUPPORTED, true);
 #if PRINT_ENABLED
             fprintf(stderr,
-                "GetAlarmSummary: Reply too big to fit into APDU!\n");
+                    "GetAlarmSummary: Reply too big to fit into APDU!\n");
 #endif
         } else {
             apdu_len =
                 bacerror_encode_apdu(&Handler_Transmit_Buffer[pdu_len],
-                service_data->invoke_id, SERVICE_CONFIRMED_GET_ALARM_SUMMARY,
-                ERROR_CLASS_PROPERTY, ERROR_CODE_OTHER);
+                                     service_data->invoke_id, SERVICE_CONFIRMED_GET_ALARM_SUMMARY,
+                                     ERROR_CLASS_PROPERTY, ERROR_CODE_OTHER);
 #if PRINT_ENABLED
             fprintf(stderr, "GetAlarmSummary: Sending Error!\n");
 #endif
@@ -145,10 +145,10 @@ void handler_get_alarm_summary(
     }
 
 
-  GET_ALARM_SUMMARY_ABORT:
+GET_ALARM_SUMMARY_ABORT:
     pdu_len += apdu_len;
     bytes_sent =
-        datalink_send_pdu(src, &npdu_data, &Handler_Transmit_Buffer[0],
+        datalink_send_pdu(src, &npci_data, &Handler_Transmit_Buffer[0],
         pdu_len);
 #if PRINT_ENABLED
     if (bytes_sent <= 0) {
@@ -158,5 +158,4 @@ void handler_get_alarm_summary(
     bytes_sent = bytes_sent;
 #endif
 
-    return;
 }

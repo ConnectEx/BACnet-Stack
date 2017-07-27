@@ -51,29 +51,29 @@ static char Object_Name[MAX_CHARACTERSTRING_VALUES][64];
 static char Object_Description[MAX_CHARACTERSTRING_VALUES][64];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Properties_Required[] = {
+static const BACNET_PROPERTY_ID Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
     PROP_PRESENT_VALUE,
     PROP_STATUS_FLAGS,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Properties_Optional[] = {
     PROP_EVENT_STATE,
     PROP_OUT_OF_SERVICE,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void CharacterString_Value_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Properties_Required;
@@ -82,7 +82,6 @@ void CharacterString_Value_Property_Lists(
     if (pProprietary)
         *pProprietary = Properties_Proprietary;
 
-    return;
 }
 
 void CharacterString_Value_Init(
@@ -95,7 +94,6 @@ void CharacterString_Value_Init(
         characterstring_init_ansi(&Present_Value[i], "");
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -198,7 +196,6 @@ static void CharacterString_Value_Out_Of_Service_Set(
         Out_Of_Service[index] = value;
     }
 
-    return;
 }
 
 static char *CharacterString_Value_Description(
@@ -487,7 +484,6 @@ void testCharacterStringValue(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_CHARACTERSTRING_VALUE

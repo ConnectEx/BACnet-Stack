@@ -43,44 +43,39 @@ typedef struct BACnet_Timestamp {
     } value;
 } BACNET_TIMESTAMP;
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
-    void bacapp_timestamp_sequence_set(
-        BACNET_TIMESTAMP * dest,
-        uint16_t sequenceNum);
+void bacapp_timestamp_sequence_set(
+    BACNET_TIMESTAMP * dest,
+    uint16_t sequenceNum);
 
-    void bacapp_timestamp_time_set(
-        BACNET_TIMESTAMP * dest,
-        BACNET_TIME *btime);
+void bacapp_timestamp_time_set(
+    BACNET_TIMESTAMP * dest,
+    BACNET_TIME *btime);
 
     void bacapp_timestamp_datetime_set(
         BACNET_TIMESTAMP * dest,
         BACNET_DATE_TIME * bdateTime);
 
-    void bacapp_timestamp_copy(
-        BACNET_TIMESTAMP * dest,
-        BACNET_TIMESTAMP * src);
+void bacapp_timestamp_copy(
+    BACNET_TIMESTAMP * dest,
+    BACNET_TIMESTAMP * src);
 
-    int bacapp_encode_timestamp(
-        uint8_t * apdu,
-        BACNET_TIMESTAMP * value);
-    int bacapp_decode_timestamp(
-        uint8_t * apdu,
-        BACNET_TIMESTAMP * value);
+int bacapp_encode_timestamp(
+    uint8_t * apdu,
+    BACNET_TIMESTAMP * value);
+
+int bacapp_decode_timestamp(
+    uint8_t * apdu,
+    BACNET_TIMESTAMP * value);
 
 
-    int bacapp_encode_context_timestamp(
-        uint8_t * apdu,
-        uint8_t tag_number,
-        BACNET_TIMESTAMP * value);
-    int bacapp_decode_context_timestamp(
-        uint8_t * apdu,
-        uint8_t tag_number,
-        BACNET_TIMESTAMP * value);
+int bacapp_encode_context_timestamp(
+    uint8_t * apdu,
+    uint8_t tag_number,
+    BACNET_TIMESTAMP * value);
+int bacapp_decode_context_timestamp(
+    uint8_t * apdu,
+    uint8_t tag_number,
+    BACNET_TIMESTAMP * value);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

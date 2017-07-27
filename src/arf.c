@@ -95,7 +95,7 @@ int arf_decode_service_request(
     int tag_len = 0;
     uint8_t tag_number = 0;
     uint32_t len_value_type = 0;
-    uint16_t type = 0;  /* for decoding */
+    BACNET_OBJECT_TYPE type ;  /* for decoding */
 
     /* check for value pointers */
     if (apdu_len && data) {
@@ -467,7 +467,6 @@ void testAtomicReadFileAck(
     }
     testAtomicReadFileAckAccess(pTest, &data);
 
-    return;
 }
 
 void testAtomicReadFileAccess(
@@ -526,7 +525,6 @@ void testAtomicReadFile(
     data.type.record.RecordCount = 2;
     testAtomicReadFileAccess(pTest, &data);
 
-    return;
 }
 
 #ifdef TEST_ATOMIC_READ_FILE

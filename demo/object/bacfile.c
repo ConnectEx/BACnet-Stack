@@ -61,7 +61,7 @@ static BACNET_FILE_LISTING BACnet_File_Listing[] = {
 };
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int bacfile_Properties_Required[] = {
+static const BACNET_PROPERTY_ID bacfile_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -71,22 +71,22 @@ static const int bacfile_Properties_Required[] = {
     PROP_ARCHIVE,
     PROP_READ_ONLY,
     PROP_FILE_ACCESS_METHOD,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int bacfile_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID bacfile_Properties_Optional[] = {
     PROP_DESCRIPTION,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int bacfile_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID bacfile_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void BACfile_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = bacfile_Properties_Required;
@@ -95,7 +95,6 @@ void BACfile_Property_Lists(
     if (pProprietary)
         *pProprietary = bacfile_Properties_Proprietary;
 
-    return;
 }
 
 static char *bacfile_name(
@@ -255,7 +254,7 @@ int bacfile_read_property(
             bdate.year = 2006;  /* AD */
             bdate.month = 4;    /* 1=Jan */
             bdate.day = 1;      /* 1..31 */
-            bdate.wday = 6;     /* 1=Monday */
+            bdate.wday = BACNET_WEEKDAY_SATURDAY;     /* 1=Monday */
             apdu_len = encode_application_date(&apdu[0], &bdate);
             /* FIXME: get the actual value */
             btime.hour = 7;
@@ -402,24 +401,27 @@ uint32_t bacfile_instance(
 uint32_t bacfile_instance_from_tsm(
     uint8_t invokeID)
 {
-    BACNET_NPDU_DATA npdu_data = { 0 }; /* dummy for getting npdu length */
+    BACNET_NPCI_DATA npci_data = { 0 }; /* dummy for getting npdu length */
     BACNET_CONFIRMED_SERVICE_DATA service_data = { 0 };
-    uint8_t service_choice = 0;
+    BACNET_CONFIRMED_SERVICE service_choice ;
     uint8_t *service_request = NULL;
     uint16_t service_request_len = 0;
     BACNET_ADDRESS dest;        /* where the original packet was destined */
     uint8_t apdu[MAX_PDU] = { 0 };      /* original APDU packet */
     uint16_t apdu_len = 0;      /* original APDU packet length */
     int len = 0;        /* apdu header length */
-    BACNET_ATOMIC_READ_FILE_DATA data = { 0 };
+    BACNET_ATOMIC_READ_FILE_DATA data ;
     uint32_t object_instance = BACNET_MAX_INSTANCE + 1; /* return value */
     bool found = false;
 
+    memset(&data, 0, sizeof(data));
+    memset(&data, 0, sizeof(BACNET_ATOMIC_READ_FILE_DATA));
+
     found =
-        tsm_get_transaction_pdu(invokeID, &dest, &npdu_data, &apdu[0],
+        tsm_get_transaction_pdu(invokeID, &dest, &npci_data, &apdu[0],
         &apdu_len);
     if (found) {
-        if (!npdu_data.network_layer_message && npdu_data.data_expecting_reply
+        if (!npci_data.network_layer_message && npci_data.data_expecting_reply
             && (apdu[0] == PDU_TYPE_CONFIRMED_SERVICE_REQUEST)) {
             len =
                 apdu_decode_confirmed_service_request(&apdu[0], apdu_len,

@@ -43,10 +43,6 @@
 #include "alarm_ack.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
     void handler_unrecognized_service(
         uint8_t * service_request,
         uint16_t service_len,
@@ -70,7 +66,7 @@ extern "C" {
     int npdu_router_send_pdu(
         uint16_t dnet,
         BACNET_ADDRESS * dest,
-        BACNET_NPDU_DATA * npdu_data,
+        BACNET_NPCI_DATA * npci_data,
         uint8_t * pdu,
         unsigned int pdu_len);
     void npdu_router_get_my_address(
@@ -359,9 +355,6 @@ extern "C" {
         BACNET_CONFIRMED_SERVICE_ACK_DATA *service_data);
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 /** @defgroup MISCHNDLR Miscellaneous Handler Utilities
  * Various utilities and functions to support the Handlers.
  */

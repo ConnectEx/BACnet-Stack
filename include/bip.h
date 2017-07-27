@@ -39,17 +39,16 @@
 
 extern bool BIP_Debug;
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
     /* note: define init, set_interface, and cleanup in your port */
     /* on Linux, ifname is eth0, ath0, arc0, and others.
        on Windows, ifname is the dotted ip address of the interface */
     bool bip_init(
         char *ifname);
+
     void bip_set_interface(
-        char *ifname);
+        const char *ifname);
+
     void bip_cleanup(
         void);
 
@@ -69,7 +68,7 @@ extern "C" {
     /* returns zero on success, non-zero on failure */
     int bip_send_pdu(
         BACNET_ADDRESS * dest,  /* destination address */
-        BACNET_NPDU_DATA * npdu_data,   /* network information */
+        BACNET_NPCI_DATA * npci_data,   /* network information */
         uint8_t * pdu,  /* any data to be sent - may be null */
         unsigned pdu_len);      /* number of bytes of data */
 
@@ -84,7 +83,9 @@ extern "C" {
     /* use network byte order for setting */
     void bip_set_port(
         uint16_t port);
+
     bool bip_port_changed(void);
+
     /* returns network byte order */
     uint16_t bip_get_port(
         void);
@@ -112,9 +113,6 @@ extern "C" {
         const char *host_name);
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 /** @defgroup DLBIP BACnet/IP DataLink Network Layer
  * @ingroup DataLink
  * Implementation of the Network Layer using BACnet/IP as the transport, as

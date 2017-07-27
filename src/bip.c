@@ -139,14 +139,14 @@ static int bip_decode_bip_address(
  * @ingroup DLBIP
  *
  * @param dest [in] Destination address (may encode an IP address and port #).
- * @param npdu_data [in] The NPDU header (Network) information (not used).
+ * @param npci_data [in] The NPDU header (Network) information (not used).
  * @param pdu [in] Buffer of data to be sent - may be null (why?).
  * @param pdu_len [in] Number of bytes in the pdu buffer.
  * @return Number of bytes sent on success, negative number on failure.
  */
 int bip_send_pdu(
     BACNET_ADDRESS * dest,      /* destination address */
-    BACNET_NPDU_DATA * npdu_data,       /* network information */
+    BACNET_NPCI_DATA * npci_data,       /* network information */
     uint8_t * pdu,      /* any data to be sent - may be null */
     unsigned pdu_len)
 {       /* number of bytes of data */
@@ -158,7 +158,7 @@ int bip_send_pdu(
     struct in_addr address;
     uint16_t port = 0;
 
-    (void) npdu_data;
+    (void) npci_data;
     /* assumes that the driver has already been initialized */
     if (BIP_Socket < 0) {
         return BIP_Socket;
@@ -225,12 +225,12 @@ uint16_t bip_receive(
     int received_bytes = 0;
     uint16_t pdu_len = 0;       /* return value */
     fd_set read_fds;
-    int max = 0;
+    int max ;
     struct timeval select_timeout;
     struct sockaddr_in sin = { 0 };
     socklen_t sin_len = sizeof(sin);
     uint16_t i = 0;
-    int function = 0;
+    int function ;
 
     /* Make sure the socket is open */
     if (BIP_Socket < 0)
@@ -375,7 +375,6 @@ void bip_get_my_address(
         }
     }
 
-    return;
 }
 
 void bip_get_broadcast_address(
@@ -395,5 +394,4 @@ void bip_get_broadcast_address(
         }
     }
 
-    return;
 }

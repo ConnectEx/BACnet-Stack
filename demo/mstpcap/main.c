@@ -153,7 +153,7 @@ static void mstp_monitor_i_am(
 {
     BACNET_ADDRESS src = { 0 };
     BACNET_ADDRESS dest = { 0 };
-    BACNET_NPDU_DATA npdu_data = { 0 };
+    BACNET_NPCI_DATA npci_data = { 0 };
     int apdu_offset = 0;
     uint16_t apdu_len = 0;
     uint8_t *apdu = NULL;
@@ -165,8 +165,8 @@ static void mstp_monitor_i_am(
 
     if (pdu[0] == BACNET_PROTOCOL_VERSION) {
         MSTP_Fill_BACnet_Address(&src, mac);
-        apdu_offset = npdu_decode(&pdu[0], &dest, &src, &npdu_data);
-        if ((!npdu_data.network_layer_message) && (apdu_offset > 0) &&
+        apdu_offset = npdu_decode(&pdu[0], &dest, &src, &npci_data);
+        if ((!npci_data.network_layer_message) && (apdu_offset > 0) &&
             (apdu_offset < pdu_len) && (src.net == 0)) {
             apdu_len = pdu_len - apdu_offset;
             apdu = &pdu[apdu_offset];
@@ -548,7 +548,7 @@ size_t data_write(
     ssize_t bytes = 0;
     if (FD_Pipe != -1) {
         bytes = write(FD_Pipe, ptr, size * nitems);
-        bytes = bytes;
+        (void) bytes ;
     }
     return fwrite(ptr, size, nitems, pFile);
 }
@@ -562,7 +562,7 @@ size_t data_write_header(
     ssize_t bytes = 0;
     if (pipe_enable && (FD_Pipe != -1)) {
         bytes = write(FD_Pipe, ptr, size * nitems);
-        bytes = bytes;
+        (void) bytes ;
     }
     return fwrite(ptr, size, nitems, pFile);
 }
@@ -955,7 +955,7 @@ void filename_create_new(
 }
 
 static void print_usage(
-    char *filename)
+    const char *filename)
 {
     printf("Usage: %s", filename);
     printf(" [--scan <filename>]\n");
@@ -965,7 +965,7 @@ static void print_usage(
     printf(" [--version][--help]\n");
 }
 
-static void print_help(char *filename) {
+static void print_help(const char *filename) {
     printf("%s --scan <filename>\n"
         "perform statistic analysis on MS/TP capture file.\n",
         filename);
@@ -1028,7 +1028,7 @@ int main(
     uint32_t packet_count = 0;
     uint32_t header_len = 0;
     int argi = 0;
-    char *filename = NULL;
+    const char *filename ;
 
     MSTP_Port.InputBuffer = &RxBuffer[0];
     MSTP_Port.InputBufferSize = sizeof(RxBuffer);

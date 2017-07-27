@@ -73,7 +73,7 @@ static struct Address_Cache_Entry {
 
 #define BAC_ADDR_LONG_TIME  BAC_ADDR_SECS_1DAY
 #define BAC_ADDR_SHORT_TIME BAC_ADDR_SECS_1HOUR
-#define BAC_ADDR_FOREVER    0xFFFFFFFF  /* Permenant entry */
+#define BAC_ADDR_FOREVER    0xFFFFFFFF  /* Permanent entry */
 
 
 void address_protected_entry_index_set(uint32_t top_protected_entry_index)
@@ -142,7 +142,6 @@ void address_remove_device(
         index++;
     }
 
-    return;
 }
 
 /*****************************************************************************
@@ -188,7 +187,7 @@ static struct Address_Cache_Entry *address_remove_oldest(
         return (pCandidate);
     }
 
-    /* Second pass - try in use and un bound as last resort */
+    /* Second pass - try in use an unbound as last resort */
     pMatch = Address_Cache;
     while (pMatch <= &Address_Cache[MAX_ADDRESS_CACHE - 1]) {
         if ((pMatch->
@@ -349,7 +348,6 @@ static void address_file_init(
         fclose(pFile);
     }
 
-    return;
 }
 
 
@@ -372,7 +370,6 @@ void address_init(
     }
     address_file_init(Address_Cache_Filename);
 
-    return;
 }
 
 /****************************************************************************
@@ -404,7 +401,6 @@ void address_init_partial(
     }
     address_file_init(Address_Cache_Filename);
 
-    return;
 }
 
 
@@ -567,7 +563,6 @@ void address_add(
             pMatch->TimeToLive = BAC_ADDR_SHORT_TIME;   /* Opportunistic entry so leave on short fuse */
         }
     }
-    return;
 }
 
 /* returns true if device is already bound */
@@ -668,7 +663,6 @@ void address_add_binding(
         }
         pMatch++;
     }
-    return;
 }
 
 bool address_device_get_by_index(

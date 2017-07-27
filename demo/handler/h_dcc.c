@@ -42,7 +42,7 @@
 
 /** @file h_dcc.c  Handles Device Communication Control request. */
 
-static char My_Password[32] = "filister";
+static char My_Password[32] = "BITS01";
 
 /** Sets (non-volatile hold) the password to be used for DCC requests.
  * @param new_password [in] The new DCC password, of up to 31 characters.
@@ -60,7 +60,8 @@ void handler_dcc_password_set(
                 break;
             }
         }
-    } else {
+    }
+    else {
         for (i = 0; i < sizeof(My_Password); i++) {
             My_Password[i] = 0;
         }
@@ -105,15 +106,15 @@ void handler_device_communication_control(
     BACNET_CHARACTER_STRING password;
     int len = 0;
     int pdu_len = 0;
-    BACNET_NPDU_DATA npdu_data;
+    BACNET_NPCI_DATA npci_data;
     BACNET_ADDRESS my_address;
 
     /* encode the NPDU portion of the reply packet */
     datalink_get_my_address(&my_address);
-    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+    npdu_setup_npci_data(&npci_data, false, MESSAGE_PRIORITY_NORMAL);
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
-        &npdu_data);
+        &npci_data);
 #if PRINT_ENABLED
     fprintf(stderr, "DeviceCommunicationControl!\n");
 #endif
@@ -198,7 +199,7 @@ void handler_device_communication_control(
   DCC_ABORT:
     pdu_len += len;
     len =
-        datalink_send_pdu(src, &npdu_data, &Handler_Transmit_Buffer[0],
+        datalink_send_pdu(src, &npci_data, &Handler_Transmit_Buffer[0],
         pdu_len);
     if (len <= 0) {
 #if PRINT_ENABLED
@@ -208,5 +209,4 @@ void handler_device_communication_control(
 #endif
     }
 
-    return;
 }

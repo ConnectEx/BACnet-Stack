@@ -96,13 +96,10 @@ extern void routed_get_my_address(
 #define MAX_HEADER (8)
 #define MAX_MPDU (MAX_HEADER+MAX_PDU)
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
     int datalink_send_pdu(
         BACNET_ADDRESS * dest,
-        BACNET_NPDU_DATA * npdu_data,
+        BACNET_NPCI_DATA * npci_data,
         uint8_t * pdu,
         unsigned pdu_len);
     extern uint16_t datalink_receive(
@@ -121,9 +118,6 @@ extern "C" {
     extern void datalink_set(
         char *datalink_string);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif
 /** @defgroup DataLink The BACnet Network (DataLink) Layer
  * <b>6 THE NETWORK LAYER </b><br>

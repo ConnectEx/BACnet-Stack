@@ -33,7 +33,7 @@
 /** @file proplist.h  Library of all required and optional object properties */
 
 struct property_list_t {
-    const int *pList;
+    const BACNET_PROPERTY_ID *pList;
     unsigned count;
 };
 
@@ -43,33 +43,32 @@ struct special_property_list_t {
     struct property_list_t Proprietary;
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+unsigned property_list_count(
+    const BACNET_PROPERTY_ID *pList);
 
-    unsigned property_list_count(
-        const int *pList);
-    const int * property_list_optional(
-        BACNET_OBJECT_TYPE object_type);
-    const int * property_list_required(
-        BACNET_OBJECT_TYPE object_type);
-    void property_list_special(
-        BACNET_OBJECT_TYPE object_type,
-        struct special_property_list_t *pPropertyList);
-    BACNET_PROPERTY_ID property_list_special_property(
-        BACNET_OBJECT_TYPE object_type,
-        BACNET_PROPERTY_ID special_property,
-        unsigned index);
-    unsigned property_list_special_count(
-        BACNET_OBJECT_TYPE object_type,
-        BACNET_PROPERTY_ID special_property);
-    int property_list_encode(
-        BACNET_READ_PROPERTY_DATA * rpdata,
-        const int *pListRequired,
-        const int *pListOptional,
-        const int *pListProprietary);
+const BACNET_PROPERTY_ID * property_list_optional(
+    BACNET_OBJECT_TYPE object_type);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+const BACNET_PROPERTY_ID* property_list_required(
+    BACNET_OBJECT_TYPE object_type);
+
+void property_list_special(
+    BACNET_OBJECT_TYPE object_type,
+    struct special_property_list_t *pPropertyList);
+
+BACNET_PROPERTY_ID property_list_special_property(
+    BACNET_OBJECT_TYPE object_type,
+    BACNET_PROPERTY_ID special_property,
+    unsigned index);
+
+unsigned property_list_special_count(
+    BACNET_OBJECT_TYPE object_type,
+    BACNET_PROPERTY_ID special_property);
+
+int property_list_encode(
+    BACNET_READ_PROPERTY_DATA * rpdata,
+    const BACNET_PROPERTY_ID *pListRequired,
+    const BACNET_PROPERTY_ID *pListOptional,
+    const BACNET_PROPERTY_ID *pListProprietary);
+
 #endif

@@ -44,14 +44,11 @@
 #include "rp.h"
 #include "wp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
     void BACfile_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+        const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
     bool bacfile_object_name(
         uint32_t object_instance,
         BACNET_CHARACTER_STRING * object_name);
@@ -73,36 +70,33 @@ extern "C" {
     uint32_t bacfile_instance_from_tsm(
         uint8_t invokeID);
 
-    /* handler ACK helper */
-    bool bacfile_read_stream_data(
-        BACNET_ATOMIC_READ_FILE_DATA * data);
-    bool bacfile_read_ack_stream_data(
-        uint32_t instance,
-        BACNET_ATOMIC_READ_FILE_DATA * data);
-    bool bacfile_write_stream_data(
-        BACNET_ATOMIC_WRITE_FILE_DATA * data);
-    bool bacfile_read_record_data(
-        BACNET_ATOMIC_READ_FILE_DATA * data);
-    bool bacfile_read_ack_record_data(
-        uint32_t instance,
-        BACNET_ATOMIC_READ_FILE_DATA * data);
-    bool bacfile_write_record_data(
-        BACNET_ATOMIC_WRITE_FILE_DATA * data);
+/* handler ACK helper */
+bool bacfile_read_stream_data(
+    BACNET_ATOMIC_READ_FILE_DATA * data);
+bool bacfile_read_ack_stream_data(
+    uint32_t instance,
+    BACNET_ATOMIC_READ_FILE_DATA * data);
+bool bacfile_write_stream_data(
+    BACNET_ATOMIC_WRITE_FILE_DATA * data);
+bool bacfile_read_record_data(
+    BACNET_ATOMIC_READ_FILE_DATA * data);
+bool bacfile_read_ack_record_data(
+    uint32_t instance,
+    BACNET_ATOMIC_READ_FILE_DATA * data);
+bool bacfile_write_record_data(
+    BACNET_ATOMIC_WRITE_FILE_DATA * data);
 
-    void bacfile_init(
-        void);
-    uint32_t bacfile_file_size(
-        uint32_t instance);
+void bacfile_init(
+    void);
+uint32_t bacfile_file_size(
+    uint32_t instance);
 
-    /* handling for read property service */
-    int bacfile_read_property(
-        BACNET_READ_PROPERTY_DATA * rpdata);
+/* handling for read property service */
+int bacfile_read_property(
+    BACNET_READ_PROPERTY_DATA * rpdata);
 
-    /* handling for write property service */
-    bool bacfile_write_property(
-        BACNET_WRITE_PROPERTY_DATA * wp_data);
+/* handling for write property service */
+bool bacfile_write_property(
+    BACNET_WRITE_PROPERTY_DATA * wp_data);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

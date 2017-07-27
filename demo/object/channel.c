@@ -77,7 +77,7 @@ struct bacnet_channel_object Channel[BACNET_CHANNELS_MAX];
 
 /* These arrays are used by the ReadPropertyMultiple handler
    property-list property (as of protocol-revision 14) */
-static const int Channel_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Channel_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -89,15 +89,15 @@ static const int Channel_Properties_Required[] = {
     PROP_LIST_OF_OBJECT_PROPERTY_REFERENCES,
     PROP_CHANNEL_NUMBER,
     PROP_CONTROL_GROUPS,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Channel_Properties_Optional[] = {
-    -1
+static const BACNET_PROPERTY_ID Channel_Properties_Optional[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Channel_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Channel_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 /**
@@ -111,9 +111,9 @@ static const int Channel_Properties_Proprietary[] = {
  * @param pProprietary - pointer to list of int terminated by -1, of
  * BACnet proprietary properties for this object.
  */
-void Channel_Property_Lists(const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+void Channel_Property_Lists(const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Channel_Properties_Required;
@@ -122,7 +122,6 @@ void Channel_Property_Lists(const int **pRequired,
     if (pProprietary)
         *pProprietary = Channel_Properties_Proprietary;
 
-    return;
 }
 
 /**
@@ -243,7 +242,7 @@ unsigned Channel_Last_Priority(uint32_t object_instance)
 BACNET_WRITE_STATUS Channel_Write_Status(uint32_t object_instance)
 {
     unsigned index = 0;
-    unsigned priority = 0;
+    BACNET_WRITE_STATUS priority = BACNET_WRITE_STATUS_IDLE ;
 
     index = Channel_Instance_To_Index(object_instance);
     if (index < BACNET_CHANNELS_MAX) {
@@ -464,12 +463,14 @@ unsigned Channel_Reference_List_Member_Element_Add(uint32_t object_instance,
  */
 unsigned Channel_Reference_List_Member_Local_Add(
     uint32_t object_instance,
-    uint16_t type,
+    BACNET_OBJECT_TYPE  type,
     uint32_t instance,
     BACNET_PROPERTY_ID propertyIdentifier,
     uint32_t arrayIndex)
 {
-    BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE member = {{0}};
+    BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE member;
+    
+    memset(&member, 0, sizeof(BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE));
 
     member.objectIdentifier.type = type;
     member.objectIdentifier.instance = instance;
@@ -1205,10 +1206,11 @@ static bool Channel_Write_Members(
     BACNET_APPLICATION_DATA_VALUE * value,
     uint8_t priority)
 {
-    BACNET_WRITE_PROPERTY_DATA wp_data = {0};
+    BACNET_WRITE_PROPERTY_DATA wp_data;
     bool status = false;
     unsigned m = 0;
     BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE *pMember = NULL;
+    memset(&wp_data, 0, sizeof(BACNET_WRITE_PROPERTY_DATA));
 
     if (pChannel && value) {
         pChannel->Write_Status = BACNET_WRITE_STATUS_IN_PROGRESS;
@@ -1705,5 +1707,4 @@ void Channel_Init(void)
         }
     }
 
-    return;
 }

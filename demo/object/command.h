@@ -56,10 +56,6 @@
 #define MAX_COMMAND_ACTIONS 8
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
     typedef struct bacnet_action_list {
         BACNET_OBJECT_ID Device_Id;     /* Optional */
         BACNET_OBJECT_ID Object_Id;
@@ -91,9 +87,9 @@ extern "C" {
     } COMMAND_DESCR;
 
     void Command_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+        const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
 
     bool Command_Valid_Instance(
         uint32_t object_instance);
@@ -169,7 +165,4 @@ extern "C" {
         Test * pTest);
 #endif
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

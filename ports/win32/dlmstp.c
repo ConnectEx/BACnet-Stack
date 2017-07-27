@@ -99,7 +99,7 @@ void dlmstp_cleanup(
 /* returns number of bytes sent on success, zero on failure */
 int dlmstp_send_pdu(
     BACNET_ADDRESS * dest,      /* destination address */
-    BACNET_NPDU_DATA * npdu_data,       /* network information */
+    BACNET_NPCI_DATA * npci_data,       /* network information */
     uint8_t * pdu,      /* any data to be sent - may be null */
     unsigned pdu_len)
 {       /* number of bytes of data */
@@ -107,7 +107,7 @@ int dlmstp_send_pdu(
     unsigned i = 0;
 
     if (!Transmit_Packet.ready) {
-        if (npdu_data->data_expecting_reply) {
+        if (npci_data->data_expecting_reply) {
             Transmit_Packet.frame_type =
                 FRAME_TYPE_BACNET_DATA_EXPECTING_REPLY;
         } else {
@@ -310,7 +310,7 @@ static bool dlmstp_compare_data_expecting_reply(
        src, dest, along with the APDU type, invoke id.
        Seems a bit overkill */
     struct DER_compare_t {
-        BACNET_NPDU_DATA npdu_data;
+        BACNET_NPCI_DATA npci_data;
         BACNET_ADDRESS address;
         uint8_t pdu_type;
         uint8_t invoke_id;
@@ -327,8 +327,8 @@ static bool dlmstp_compare_data_expecting_reply(
     request.address.mac_len = 1;
     offset =
         (uint16_t) npdu_decode(&request_pdu[0], NULL, &request.address,
-        &request.npdu_data);
-    if (request.npdu_data.network_layer_message) {
+        &request.npci_data);
+    if (request.npci_data.network_layer_message) {
         return false;
     }
     request.pdu_type = request_pdu[offset] & 0xF0;
@@ -345,8 +345,8 @@ static bool dlmstp_compare_data_expecting_reply(
     bacnet_address_copy(&reply.address, dest_address);
     offset =
         (uint16_t) npdu_decode(&reply_pdu[0], &reply.address, NULL,
-        &reply.npdu_data);
-    if (reply.npdu_data.network_layer_message) {
+        &reply.npci_data);
+    if (reply.npci_data.network_layer_message) {
         return false;
     }
     /* reply could be a lot of things:
@@ -398,13 +398,13 @@ static bool dlmstp_compare_data_expecting_reply(
             return false;
         }
     }
-    if (request.npdu_data.protocol_version != reply.npdu_data.protocol_version) {
+    if (request.npci_data.protocol_version != reply.npci_data.protocol_version) {
         return false;
     }
 #if 0
     /* the NDPU priority doesn't get passed through the stack, and
        all outgoing messages have NORMAL priority */
-    if (request.npdu_data.priority != reply.npdu_data.priority) {
+    if (request.npci_data.priority != reply.npci_data.priority) {
         return false;
     }
 #endif
@@ -470,7 +470,6 @@ void dlmstp_set_mac_address(
             dlmstp_set_max_master(mac_address);
     }
 
-    return;
 }
 
 uint8_t dlmstp_mac_address(
@@ -498,7 +497,6 @@ void dlmstp_set_max_info_frames(
            EEPROM_MSTP_MAX_INFO_FRAMES_ADDR); */
     }
 
-    return;
 }
 
 uint8_t dlmstp_max_info_frames(
@@ -526,7 +524,6 @@ void dlmstp_set_max_master(
         }
     }
 
-    return;
 }
 
 uint8_t dlmstp_max_master(
@@ -561,7 +558,6 @@ void dlmstp_get_my_address(
         my_address->adr[i] = 0;
     }
 
-    return;
 }
 
 void dlmstp_get_broadcast_address(
@@ -579,7 +575,6 @@ void dlmstp_get_broadcast_address(
         }
     }
 
-    return;
 }
 
 bool dlmstp_init(
@@ -591,6 +586,7 @@ bool dlmstp_init(
     /* initialize packet queue */
     Receive_Packet.ready = false;
     Receive_Packet.pdu_len = 0;
+#if 0 // todo1
     Receive_Packet_Flag = CreateSemaphore(NULL, 0, 1, "dlmstpReceivePacket");
     if (Receive_Packet_Flag == NULL)
         exit(1);
@@ -599,6 +595,7 @@ bool dlmstp_init(
         CloseHandle(Receive_Packet_Flag);
         exit(1);
     }
+#endif
     /* initialize hardware */
     timer_init();
     if (ifname) {
@@ -647,6 +644,7 @@ bool dlmstp_init(
     fprintf(stderr, "MS/TP Max_Info_Frames: %u\n",
         (unsigned) MSTP_Port.Nmax_info_frames);
 #endif
+#if 0 // todo1
     hThread = _beginthread(dlmstp_receive_fsm_task, 4096, &arg_value);
     if (hThread == 0) {
         fprintf(stderr, "Failed to start recive FSM task\n");
@@ -655,7 +653,7 @@ bool dlmstp_init(
     if (hThread == 0) {
         fprintf(stderr, "Failed to start Master Node FSM task\n");
     }
-
+#endif
     return true;
 }
 

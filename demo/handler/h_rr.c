@@ -66,12 +66,12 @@ static int Encode_RR_payload(
         if ((pRequest->RequestType == RR_BY_POSITION) && (pRequest->Range.RefIndex == 0)) {     /* First index is 1 so can't accept 0 */
             pRequest->error_code = ERROR_CODE_OTHER;    /* I couldn't see anything more appropriate so... */
         } else if (((PropInfo.RequestTypes & RR_ARRAY_OF_LISTS) == 0) &&
-            (pRequest->array_index != 0) &&
-            (pRequest->array_index != BACNET_ARRAY_ALL)) {
+                   (pRequest->array_index != 0) &&
+                   (pRequest->array_index != BACNET_ARRAY_ALL)) {
             /* Array access attempted on a non array property */
             pRequest->error_code = ERROR_CODE_PROPERTY_IS_NOT_AN_ARRAY;
         } else if ((pRequest->RequestType != RR_READ_ALL) &&
-            ((PropInfo.RequestTypes & pRequest->RequestType) == 0)) {
+                   ((PropInfo.RequestTypes & pRequest->RequestType) == 0)) {
             /* By Time or By Sequence not supported - By Position is always required */
             pRequest->error_code = ERROR_CODE_OTHER;    /* I couldn't see anything more appropriate so... */
         } else if ((pRequest->Count == 0) && (pRequest->RequestType != RR_READ_ALL)) {  /* Count cannot be zero */
@@ -96,7 +96,7 @@ void handler_read_range(
     BACNET_READ_RANGE_DATA data;
     int len = 0;
     int pdu_len = 0;
-    BACNET_NPDU_DATA npdu_data;
+    BACNET_NPCI_DATA npci_data;
     bool error = false;
     int bytes_sent = 0;
     BACNET_ADDRESS my_address;
@@ -105,10 +105,10 @@ void handler_read_range(
     data.error_code = ERROR_CODE_UNKNOWN_OBJECT;
     /* encode the NPDU portion of the packet */
     datalink_get_my_address(&my_address);
-    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+    npdu_setup_npci_data(&npci_data, false, MESSAGE_PRIORITY_NORMAL);
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
-        &npdu_data);
+        &npci_data);
     if (service_data->segmented_message) {
         /* we don't support segmentation - send an abort */
         len =
@@ -176,12 +176,11 @@ void handler_read_range(
   RR_ABORT:
     pdu_len += len;
     bytes_sent =
-        datalink_send_pdu(src, &npdu_data, &Handler_Transmit_Buffer[0],
+        datalink_send_pdu(src, &npci_data, &Handler_Transmit_Buffer[0],
         pdu_len);
 #if PRINT_ENABLED
     if (bytes_sent <= 0)
         fprintf(stderr, "Failed to send PDU (%s)!\n", strerror(errno));
 #endif
 
-    return;
 }

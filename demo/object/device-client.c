@@ -53,7 +53,7 @@
 #if defined(__BORLANDC__) || defined(_WIN32)
 /* seems to not be defined in time.h as specified by The Open Group */
 /* difference from UTC and local standard time  */
-long int timezone;
+extern long int timezone;
 #endif
 
 /* note: you really only need to define variables for
@@ -66,10 +66,11 @@ static BACNET_CHARACTER_STRING My_Object_Name;
 static BACNET_DEVICE_STATUS System_Status = STATUS_OPERATIONAL;
 static char *Vendor_Name = BACNET_VENDOR_NAME;
 static uint16_t Vendor_Identifier = BACNET_VENDOR_ID;
-static char *Model_Name = "GNU";
+static char *Model_Name = "BITS Reference Stack";
 static char *Application_Software_Version = "1.0";
 static char *Location = "USA";
 static char *Description = "command line client";
+extern const char *BACnet_Version;
 /* static uint8_t Protocol_Version = 1; - constant, not settable */
 /* static uint8_t Protocol_Revision = 4; - constant, not settable */
 /* Protocol_Services_Supported - dynamically generated */
@@ -111,10 +112,10 @@ static uint32_t Database_Revision = 0;
 /* local forward (semi-private) and external prototypes */
 int Device_Read_Property_Local(
     BACNET_READ_PROPERTY_DATA * rpdata);
-extern int Routed_Device_Read_Property_Local(
-    BACNET_READ_PROPERTY_DATA * rpdata);
-extern bool Routed_Device_Write_Property_Local(
-    BACNET_WRITE_PROPERTY_DATA * wp_data);
+//extern int Routed_Device_Read_Property_Local(
+//    BACNET_READ_PROPERTY_DATA * rpdata);
+//extern bool Routed_Device_Write_Property_Local(
+//    BACNET_WRITE_PROPERTY_DATA * wp_data);
 
 /* All included BACnet objects */
 static object_functions_t Object_Table[] = {
@@ -184,7 +185,7 @@ unsigned Device_Count(
 uint32_t Device_Index_To_Instance(
     unsigned index)
 {
-    index = index;
+    (void) index ;
     return Object_Instance_Number;
 }
 
@@ -513,7 +514,7 @@ unsigned Device_Object_List_Count(
  */
 bool Device_Object_List_Identifier(
     uint32_t array_index,
-    int *object_type,
+    BACNET_OBJECT_TYPE *object_type,
     uint32_t * instance)
 {
     bool status = false;
@@ -572,11 +573,11 @@ bool Device_Object_List_Identifier(
  */
 bool Device_Valid_Object_Name(
     BACNET_CHARACTER_STRING * object_name1,
-    int *object_type,
+    BACNET_OBJECT_TYPE *object_type,
     uint32_t * object_instance)
 {
     bool found = false;
-    int type = 0;
+    BACNET_OBJECT_TYPE type ;
     uint32_t instance;
     uint32_t max_objects = 0, i = 0;
     bool check_id = false;
@@ -612,7 +613,7 @@ bool Device_Valid_Object_Name(
  * @return True if found, else False if no such Object in this device.
  */
 bool Device_Valid_Object_Id(
-    int object_type,
+    BACNET_OBJECT_TYPE object_type,
     uint32_t object_instance)
 {
     bool status = false;        /* return value */
@@ -809,7 +810,7 @@ int Device_Read_Property_Local(
     BACNET_BIT_STRING bit_string;
     BACNET_CHARACTER_STRING char_string;
     uint32_t i = 0;
-    int object_type = 0;
+    BACNET_OBJECT_TYPE object_type = OBJECT_ANALOG_INPUT;
     uint32_t instance = 0;
     uint32_t count = 0;
     uint8_t *apdu = NULL;

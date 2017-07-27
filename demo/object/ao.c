@@ -60,7 +60,7 @@ static bool Out_Of_Service[MAX_ANALOG_OUTPUTS];
 static bool Analog_Output_Initialized = false;
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Properties_Required[] = {
+static const BACNET_PROPERTY_ID Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -71,21 +71,22 @@ static const int Properties_Required[] = {
     PROP_UNITS,
     PROP_PRIORITY_ARRAY,
     PROP_RELINQUISH_DEFAULT,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Optional[] = {
-    -1
+static const BACNET_PROPERTY_ID Properties_Optional[] = {
+    PROP_DESCRIPTION,
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Analog_Output_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Properties_Required;
@@ -94,8 +95,8 @@ void Analog_Output_Property_Lists(
     if (pProprietary)
         *pProprietary = Properties_Proprietary;
 
-    return;
 }
+
 
 void Analog_Output_Init(
     void)
@@ -113,7 +114,6 @@ void Analog_Output_Init(
         }
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -268,6 +268,7 @@ bool Analog_Output_Object_Name(
     return status;
 }
 
+
 bool Analog_Output_Out_Of_Service(
     uint32_t instance)
 {
@@ -310,7 +311,7 @@ int Analog_Output_Read_Property(
 
     if ((rpdata == NULL) || (rpdata->application_data == NULL) ||
         (rpdata->application_data_len == 0)) {
-        return 0;
+        return BACNET_STATUS_ERROR;
     }
     apdu = rpdata->application_data;
     switch (rpdata->object_property) {
@@ -325,14 +326,17 @@ int Analog_Output_Read_Property(
             apdu_len =
                 encode_application_character_string(&apdu[0], &char_string);
             break;
+
         case PROP_OBJECT_TYPE:
             apdu_len =
                 encode_application_enumerated(&apdu[0], OBJECT_ANALOG_OUTPUT);
             break;
+
         case PROP_PRESENT_VALUE:
             real_value = Analog_Output_Present_Value(rpdata->object_instance);
             apdu_len = encode_application_real(&apdu[0], real_value);
             break;
+
         case PROP_STATUS_FLAGS:
             bitstring_init(&bit_string);
             bitstring_set_bit(&bit_string, STATUS_FLAG_IN_ALARM, false);
@@ -560,7 +564,6 @@ void testAnalogOutput(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_ANALOG_OUTPUT

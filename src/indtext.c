@@ -13,9 +13,9 @@
  GNU General Public License for more details.
 
  You should have received a copy of the GNU General Public License
- along with this program; if not, write to 
+ along with this program; if not, write to
  The Free Software Foundation, Inc.
- 59 Temple Place - Suite 330 
+ 59 Temple Place - Suite 330
  Boston, MA  02111-1307, USA.
 
  As a special exception, if other files instantiate templates or
@@ -57,6 +57,7 @@ int stricmp(
     return (int) c1 - c2;
 }
 #endif
+
 #if defined(_MSC_VER)
 #define stricmp _stricmp
 #endif
@@ -67,12 +68,13 @@ bool indtext_by_string(
     unsigned *found_index)
 {
     bool found = false;
-    unsigned index = 0;
+    // index conflicts with a GCC library name... renamed index to localIndex
+    unsigned localIndex = 0;
 
     if (data_list && search_name) {
         while (data_list->pString) {
             if (strcmp(data_list->pString, search_name) == 0) {
-                index = data_list->index;
+	            localIndex = data_list->index;
                 found = true;
                 break;
             }
@@ -81,7 +83,7 @@ bool indtext_by_string(
     }
 
     if (found && found_index)
-        *found_index = index;
+		*found_index = localIndex;
 
     return found;
 }
@@ -167,7 +169,7 @@ const char *indtext_by_index_split_default(
 {
     if (index < split_index)
         return indtext_by_index_default(data_list, index,
-            before_split_default_name);
+                                        before_split_default_name);
     else
         return indtext_by_index_default(data_list, index, default_name);
 }

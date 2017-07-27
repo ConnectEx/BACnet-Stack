@@ -60,14 +60,14 @@
 static struct Keylist_Node *NodeCreate(
     void)
 {
-    return calloc(1, sizeof(struct Keylist_Node));
+    return (struct Keylist_Node *) calloc(1, sizeof(struct Keylist_Node));
 }
 
 /* grab memory for a list */
 static struct Keylist *KeylistCreate(
     void)
 {
-    return calloc(1, sizeof(struct Keylist));
+    return (struct Keylist *) calloc(1, sizeof(struct Keylist));
 }
 
 /* check to see if the array is big enough for an addition */
@@ -93,7 +93,7 @@ static int CheckArraySize(
     if (new_size) {
 
         /* Allocate more room for node pointer array */
-        new_array = calloc((size_t) new_size, sizeof(new_array));
+        new_array = (struct Keylist_Node **) calloc((size_t) new_size, sizeof(new_array));
 
         /* See if we got the memory we wanted */
         if (!new_array)
@@ -293,7 +293,7 @@ void *Keylist_Data_Pop(
 }
 
 /* returns the data from the node specified by key */
-void *Keylist_Data(
+struct Keylist_Node *Keylist_Data(
     OS_Keylist list,
     KEY key)
 {
@@ -305,7 +305,7 @@ void *Keylist_Data(
             node = list->array[index];
     }
 
-    return node ? node->data : NULL;
+    return node ? (struct Keylist_Node *) node->data : NULL;
 }
 
 /* returns the index from the node specified by key */
@@ -413,7 +413,6 @@ void Keylist_Delete(
         free(list);
     }
 
-    return;
 }
 
 #ifdef TEST
@@ -463,7 +462,6 @@ static void testKeyListFIFO(
 
     Keylist_Delete(list);
 
-    return;
 }
 
 /* test the FILO */
@@ -511,7 +509,6 @@ static void testKeyListFILO(
 
     Keylist_Delete(list);
 
-    return;
 }
 
 static void testKeyListDataKey(
@@ -592,7 +589,6 @@ static void testKeyListDataKey(
 
     Keylist_Delete(list);
 
-    return;
 }
 
 static void testKeyListDataIndex(
@@ -663,7 +659,6 @@ static void testKeyListDataIndex(
 
     Keylist_Delete(list);
 
-    return;
 }
 
 /* test access of a lot of entries */
@@ -695,7 +690,6 @@ static void testKeyListLarge(
     }
     Keylist_Delete(list);
 
-    return;
 }
 
 /* test access of a lot of entries */

@@ -53,7 +53,7 @@ static bool Change_Of_Value[MAX_BINARY_INPUTS];
 static BACNET_POLARITY Polarity[MAX_BINARY_INPUTS];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Binary_Input_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Binary_Input_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -62,22 +62,23 @@ static const int Binary_Input_Properties_Required[] = {
     PROP_EVENT_STATE,
     PROP_OUT_OF_SERVICE,
     PROP_POLARITY,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Binary_Input_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Binary_Input_Properties_Optional[] = {
     PROP_DESCRIPTION,
-    -1
+	PROP_RELIABILITY,
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Binary_Input_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Binary_Input_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Binary_Input_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired) {
         *pRequired = Binary_Input_Properties_Required;
@@ -89,7 +90,6 @@ void Binary_Input_Property_Lists(
         *pProprietary = Binary_Input_Properties_Proprietary;
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -137,7 +137,6 @@ void Binary_Input_Init(
         }
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -214,7 +213,6 @@ void Binary_Input_Change_Of_Value_Clear(
         Change_Of_Value[index] = false;
     }
 
-    return;
 }
 
 /**
@@ -310,7 +308,6 @@ void Binary_Input_Out_Of_Service_Set(
         Out_Of_Service[index] = value;
     }
 
-    return;
 }
 
 bool Binary_Input_Object_Name(
@@ -480,6 +477,7 @@ bool Binary_Input_Write_Property(
                 }
             }
             break;
+
         case PROP_OUT_OF_SERVICE:
             status =
                 WPValidateArgType(&value, BACNET_APPLICATION_TAG_BOOLEAN,
@@ -489,6 +487,7 @@ bool Binary_Input_Write_Property(
                     value.type.Boolean);
             }
             break;
+
         case PROP_POLARITY:
             status =
                 WPValidateArgType(&value, BACNET_APPLICATION_TAG_ENUMERATED,
@@ -504,6 +503,7 @@ bool Binary_Input_Write_Property(
                 }
             }
             break;
+
         case PROP_OBJECT_IDENTIFIER:
         case PROP_OBJECT_NAME:
         case PROP_DESCRIPTION:
@@ -567,7 +567,6 @@ void testBinaryInput(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_BINARY_INPUT

@@ -32,24 +32,20 @@
 #include "rp.h"
 #include "wp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
     void Binary_Value_Init(
         void);
 
     void Binary_Value_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+        const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
 
     bool Binary_Value_Valid_Instance(
         uint32_t object_instance);
     unsigned Binary_Value_Count(
         void);
     uint32_t Binary_Value_Index_To_Instance(
-        unsigned index);
+        unsigned objectIndex);
     unsigned Binary_Value_Instance_To_Index(
         uint32_t object_instance);
     bool Binary_Value_Object_Instance_Add(
@@ -146,7 +142,4 @@ extern "C" {
         Test * pTest);
 #endif
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

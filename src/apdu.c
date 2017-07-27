@@ -42,14 +42,15 @@
 #include "tsm.h"
 #include "dcc.h"
 #include "iam.h"
+#include "device.h"
 
 /** @file apdu.c  Handles APDU services */
 
-extern int Routed_Device_Service_Approval(
-    BACNET_CONFIRMED_SERVICE service,
-    int service_argument,
-    uint8_t * apdu_buff,
-    uint8_t invoke_id);
+//extern int Routed_Device_Service_Approval(
+//    BACNET_CONFIRMED_SERVICE service,
+//    int service_argument,
+//    uint8_t * apdu_buff,
+//    uint8_t invoke_id);
 
 
 /* APDU Timeout in Milliseconds */
@@ -157,8 +158,8 @@ bool apdu_service_supported(
 #if BAC_ROUTING
                     /* Check to see if the current Device supports this service. */
                     int len =
-                        Routed_Device_Service_Approval(service_supported, 0,
-                        NULL, 0);
+                        Routed_Device_Service_Approval((BACNET_CONFIRMED_SERVICE)service_supported, 0,
+                            NULL, 0);
                     if (len > 0)
                         break;  /* Not supported - return false */
 #endif
@@ -325,7 +326,7 @@ uint16_t apdu_decode_confirmed_service_request(
     uint8_t * apdu,     /* APDU data */
     uint16_t apdu_len,
     BACNET_CONFIRMED_SERVICE_DATA * service_data,
-    uint8_t * service_choice,
+    BACNET_CONFIRMED_SERVICE * service_choice,
     uint8_t ** service_request,
     uint16_t * service_request_len)
 {
@@ -343,7 +344,7 @@ uint16_t apdu_decode_confirmed_service_request(
         service_data->sequence_number = apdu[len++];
         service_data->proposed_window_number = apdu[len++];
     }
-    *service_choice = apdu[len++];
+    *service_choice = (BACNET_CONFIRMED_SERVICE) apdu[len++];
     *service_request = &apdu[len];
     *service_request_len = apdu_len - len;
 
@@ -447,7 +448,7 @@ void apdu_handler(
     BACNET_CONFIRMED_SERVICE_DATA service_data = { 0 };
     BACNET_CONFIRMED_SERVICE_ACK_DATA service_ack_data = { 0 };
     uint8_t invoke_id = 0;
-    uint8_t service_choice = 0;
+    BACNET_CONFIRMED_SERVICE service_choice ;
     uint8_t *service_request = NULL;
     uint16_t service_request_len = 0;
     int len = 0;        /* counts where we are in PDU */
@@ -455,7 +456,7 @@ void apdu_handler(
     uint32_t len_value = 0;
     uint32_t error_code = 0;
     uint32_t error_class = 0;
-    uint8_t reason = 0;
+    BACNET_ABORT_REASON reason ;
     bool server = false;
 
     if (apdu) {
@@ -480,7 +481,7 @@ void apdu_handler(
                         service_request_len, src, &service_data);
                 break;
             case PDU_TYPE_UNCONFIRMED_SERVICE_REQUEST:
-                service_choice = apdu[1];
+                service_choice = (BACNET_CONFIRMED_SERVICE)apdu[1];
                 service_request = &apdu[2];
                 service_request_len = apdu_len - 2;
                 if (apdu_unconfirmed_dcc_disabled(service_choice)) {
@@ -499,7 +500,7 @@ void apdu_handler(
                 break;
             case PDU_TYPE_SIMPLE_ACK:
                 invoke_id = apdu[1];
-                service_choice = apdu[2];
+                service_choice = (BACNET_CONFIRMED_SERVICE)apdu[2];
                 switch (service_choice) {
                     case SERVICE_CONFIRMED_ACKNOWLEDGE_ALARM:
                     case SERVICE_CONFIRMED_COV_NOTIFICATION:
@@ -543,7 +544,7 @@ void apdu_handler(
                     service_ack_data.sequence_number = apdu[len++];
                     service_ack_data.proposed_window_number = apdu[len++];
                 }
-                service_choice = apdu[len++];
+                service_choice = (BACNET_CONFIRMED_SERVICE)apdu[len++];
                 service_request = &apdu[len];
                 service_request_len = apdu_len - (uint16_t) len;
                 switch (service_choice) {
@@ -583,7 +584,7 @@ void apdu_handler(
                 break;
             case PDU_TYPE_ERROR:
                 invoke_id = apdu[1];
-                service_choice = apdu[2];
+                service_choice = (BACNET_CONFIRMED_SERVICE)apdu[2];
                 len = 3;
 
                 /* FIXME: Currently special case for C_P_T but there are others which may
@@ -622,7 +623,7 @@ void apdu_handler(
                 break;
             case PDU_TYPE_REJECT:
                 invoke_id = apdu[1];
-                reason = apdu[2];
+                reason = (BACNET_ABORT_REASON) apdu[2];
                 if (Reject_Function)
                     Reject_Function(src, invoke_id, reason);
                 tsm_free_invoke_id(invoke_id);
@@ -630,7 +631,7 @@ void apdu_handler(
             case PDU_TYPE_ABORT:
                 server = apdu[0] & 0x01;
                 invoke_id = apdu[1];
-                reason = apdu[2];
+                reason = (BACNET_ABORT_REASON) apdu[2];
                 if (Abort_Function)
                     Abort_Function(src, invoke_id, reason, server);
                 tsm_free_invoke_id(invoke_id);
@@ -639,5 +640,4 @@ void apdu_handler(
                 break;
         }
     }
-    return;
 }

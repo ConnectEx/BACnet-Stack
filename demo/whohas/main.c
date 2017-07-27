@@ -65,7 +65,7 @@ static bool Error_Detected = false;
 void MyAbortHandler(
     BACNET_ADDRESS * src,
     uint8_t invoke_id,
-    uint8_t abort_reason,
+    BACNET_ABORT_REASON abort_reason,
     bool server)
 {
     /* FIXME: verify src and invoke id */
@@ -110,14 +110,14 @@ static void Init_Service_Handlers(
 }
 
 static void print_usage(
-    char *filename)
+    const char *filename)
 {
     printf("Usage: %s [device-instance-min device-instance-min] "
         "<object-type object-instance | object-name> [--help]\r\n", filename);
 }
 
 static void print_help(
-    char *filename)
+    const char *filename)
 {
     print_usage(filename);
     printf("Send BACnet WhoHas request to devices, \r\n"
@@ -166,7 +166,7 @@ int main(
     } else if (argc < 4) {
         /* bacwh 8 1234 */
         Target_Object_Instance_Min = Target_Object_Instance_Max = -1;
-        Target_Object_Type = strtol(argv[1], NULL, 0);
+        Target_Object_Type = (BACNET_OBJECT_TYPE)strtol(argv[1], NULL, 0);
         Target_Object_Instance = strtol(argv[2], NULL, 0);
     } else if (argc < 5) {
         /* bacwh 0 4194303 "name" */
@@ -178,7 +178,7 @@ int main(
         /* bacwh 0 4194303 8 1234 */
         Target_Object_Instance_Min = strtol(argv[1], NULL, 0);
         Target_Object_Instance_Max = strtol(argv[2], NULL, 0);
-        Target_Object_Type = strtol(argv[3], NULL, 0);
+        Target_Object_Type = (BACNET_OBJECT_TYPE)strtol(argv[3], NULL, 0);
         Target_Object_Instance = strtol(argv[4], NULL, 0);
     } else {
         print_usage(filename_remove_path(argv[0]));
@@ -233,6 +233,7 @@ int main(
         Send_WhoHas_Object(Target_Object_Instance_Min,
             Target_Object_Instance_Max, Target_Object_Type,
             Target_Object_Instance);
+            
     }
     /* loop forever */
     for (;;) {
@@ -244,8 +245,10 @@ int main(
         if (pdu_len) {
             npdu_handler(&src, &Rx_Buf[0], pdu_len);
         }
+        
         if (Error_Detected)
             break;
+            
         /* increment timer - exit if timed out */
         elapsed_seconds += (current_seconds - last_seconds);
         if (elapsed_seconds > timeout_seconds)

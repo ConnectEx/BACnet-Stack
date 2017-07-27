@@ -53,7 +53,7 @@ static BACNET_BINARY_PV
 static bool Out_Of_Service[MAX_BINARY_VALUES];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Binary_Value_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Binary_Value_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -61,24 +61,25 @@ static const int Binary_Value_Properties_Required[] = {
     PROP_STATUS_FLAGS,
     PROP_EVENT_STATE,
     PROP_OUT_OF_SERVICE,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Binary_Value_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Binary_Value_Properties_Optional[] = {
     PROP_DESCRIPTION,
     PROP_PRIORITY_ARRAY,
     PROP_RELINQUISH_DEFAULT,
-    -1
+    PROP_RELIABILITY,
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Binary_Value_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Binary_Value_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Binary_Value_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Binary_Value_Properties_Required;
@@ -87,7 +88,6 @@ void Binary_Value_Property_Lists(
     if (pProprietary)
         *pProprietary = Binary_Value_Properties_Proprietary;
 
-    return;
 }
 
 void Binary_Value_Init(
@@ -107,7 +107,6 @@ void Binary_Value_Init(
         }
     }
 
-    return;
 }
 
 /* we simply have 0-n object instances.  Yours might be */
@@ -273,6 +272,13 @@ int Binary_Value_Read_Property(
             apdu_len =
                 encode_application_enumerated(&apdu[0], EVENT_STATE_NORMAL);
             break;
+
+    case PROP_RELIABILITY:
+        apdu_len = encode_application_enumerated(&apdu[0], 
+            0
+			      );
+        break;
+
         case PROP_OUT_OF_SERVICE:
             state = Binary_Value_Out_Of_Service(rpdata->object_instance);
             apdu_len = encode_application_boolean(&apdu[0], state);
@@ -512,7 +518,6 @@ void testBinary_Value(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_BINARY_VALUE

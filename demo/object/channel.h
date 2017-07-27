@@ -41,10 +41,6 @@
 #include "wp.h"
 #include "lo.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 /* BACNET_CHANNEL_VALUE decodes WriteProperty service requests
    Choose the datatypes that your application supports */
 #if !(defined(CHANNEL_NUMERIC) || \
@@ -124,9 +120,9 @@ extern "C" {
         struct BACnet_Channel_Value_t *next;
     } BACNET_CHANNEL_VALUE;
 
-    void Channel_Property_Lists(const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+    void Channel_Property_Lists(const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
     bool Channel_Valid_Instance(uint32_t object_instance);
     unsigned Channel_Count(void);
     uint32_t Channel_Index_To_Instance(unsigned index);
@@ -166,7 +162,7 @@ extern "C" {
         BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE *pMemberSrc);
     unsigned Channel_Reference_List_Member_Local_Add(
         uint32_t object_instance,
-        uint16_t type,
+        BACNET_OBJECT_TYPE type,
         uint32_t instance,
         BACNET_PROPERTY_ID propertyIdentifier,
         uint32_t arrayIndex);
@@ -197,7 +193,4 @@ extern "C" {
     void testChannelObject(Test * pTest);
 #endif
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

@@ -163,6 +163,7 @@ int cl_decode_apdu(
     int dec_len = 0;
     uint8_t tag_number = 0;
     uint32_t len_value_type = 0;
+    uint32_t tempId ;
 
     if (decode_is_context_tag(&apdu[dec_len], 0)) {
         /* Tag 0: Device ID */
@@ -191,8 +192,8 @@ int cl_decode_apdu(
     if (tag_number != 2)
         return BACNET_STATUS_REJECT;
     len =
-        decode_enumerated(&apdu[dec_len], len_value_type,
-        &bcl->Property_Identifier);
+        decode_enumerated(&apdu[dec_len], len_value_type, &tempId);
+    bcl->Property_Identifier = (BACNET_PROPERTY_ID)tempId;
     if (len < 0)
         return BACNET_STATUS_REJECT;
     dec_len += len;
@@ -340,7 +341,7 @@ int cl_decode_apdu(
 COMMAND_DESCR Command_Descr[MAX_COMMANDS];
 
 /* These arrays are used by the ReadPropertyMultiple handler */
-static const int Command_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Command_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -348,16 +349,16 @@ static const int Command_Properties_Required[] = {
     PROP_IN_PROCESS,
     PROP_ALL_WRITES_SUCCESSFUL,
     PROP_ACTION,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Command_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Command_Properties_Optional[] = {
     PROP_DESCRIPTION,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Command_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Command_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 /**
@@ -372,9 +373,9 @@ static const int Command_Properties_Proprietary[] = {
  * BACnet proprietary properties for this object.
  */
 void Command_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Command_Properties_Required;
@@ -383,7 +384,6 @@ void Command_Property_Lists(
     if (pProprietary)
         *pProprietary = Command_Properties_Proprietary;
 
-    return;
 }
 
 
@@ -936,7 +936,6 @@ void testCommand(
     ct_test(pTest, clist.Post_Delay == clist_test.Post_Delay);
     ct_test(pTest, clist.Quit_On_Failure == clist_test.Quit_On_Failure);
     ct_test(pTest, clist.Write_Successful == clist_test.Write_Successful);
-    return;
 }
 
 #ifdef TEST_COMMAND

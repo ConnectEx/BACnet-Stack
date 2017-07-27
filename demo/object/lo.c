@@ -75,7 +75,7 @@ struct lighting_output_object Lighting_Output[MAX_LIGHTING_OUTPUTS];
 
 /* These arrays are used by the ReadPropertyMultiple handler and
    property-list property (as of protocol-revision 14) */
-static const int Lighting_Output_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Lighting_Output_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -94,14 +94,14 @@ static const int Lighting_Output_Properties_Required[] = {
     PROP_PRIORITY_ARRAY,
     PROP_RELINQUISH_DEFAULT,
     PROP_LIGHTING_COMMAND_DEFAULT_PRIORITY,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
-static const int Lighting_Output_Properties_Optional[] = {
-    -1
+static const BACNET_PROPERTY_ID Lighting_Output_Properties_Optional[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Lighting_Output_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Lighting_Output_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 /**
@@ -116,9 +116,9 @@ static const int Lighting_Output_Properties_Proprietary[] = {
  * BACnet proprietary properties for this object.
  */
 void Lighting_Output_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Lighting_Output_Properties_Required;
@@ -127,7 +127,6 @@ void Lighting_Output_Property_Lists(
     if (pProprietary)
         *pProprietary = Lighting_Output_Properties_Proprietary;
 
-    return;
 }
 
 /**
@@ -1402,7 +1401,6 @@ void Lighting_Output_Init(
         Lighting_Output[i].Lighting_Command_Default_Priority = 16;
     }
 
-    return;
 }
 
 #ifdef TEST
@@ -1450,7 +1448,6 @@ void testLightingOutput(
     ct_test(pTest, decoded_type == rpdata.object_type);
     ct_test(pTest, decoded_instance == rpdata.object_instance);
 
-    return;
 }
 
 #ifdef TEST_LIGHTING_OUTPUT

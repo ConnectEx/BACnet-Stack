@@ -33,9 +33,6 @@
 #include "rp.h"
 #include "wp.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 /* Error code for Trend Log storage */
     typedef struct tl_error {
@@ -124,9 +121,9 @@ extern "C" {
 
 
     void Trend_Log_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+        const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
 
     bool Trend_Log_Valid_Instance(
         uint32_t object_instance);
@@ -194,7 +191,4 @@ extern "C" {
     void trend_log_timer(
         uint16_t uSeconds);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif

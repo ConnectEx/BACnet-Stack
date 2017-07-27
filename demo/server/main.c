@@ -65,12 +65,15 @@
 #endif /* defined(BAC_UCI) */
 
 
+
 /** @file server/main.c  Example server application using the BACnet Stack. */
 
 /* (Doxygen note: The next two lines pull all the following Javadoc
  *  into the ServerDemo module.) */
 /** @addtogroup ServerDemo */
 /*@{*/
+
+extern const char *BACnet_Version;
 
 /** Buffer used for receiving */
 static uint8_t Rx_Buf[MAX_MPDU] = { 0 };
@@ -87,16 +90,16 @@ static void Init_Service_Handlers(
     apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_WHO_HAS, handler_who_has);
 
 #if 0
-	/* 	BACnet Testing Observed Incident oi00107
-		Server only devices should not indicate that they EXECUTE I-Am
-		Revealed by BACnet Test Client v1.8.16 ( www.bac-test.com/bacnet-test-client-download )
-			BITS: BIT00040
-		Any discussions can be directed to edward@bac-test.com
-		Please feel free to remove this comment when my changes accepted after suitable time for
-		review by all interested parties. Say 6 months -> September 2016 */
-	/* In this demo, we are the server only ( BACnet "B" device ) so we do not indicate
-	   that we can execute the I-Am message */
-    /* handle i-am to support binding to other devices */
+    /* 	BACnet Testing Observed Incident oi00107
+        Server only devices should not indicate that they EXECUTE I-Am
+        Revealed by BACnet Test Client v1.8.16 ( www.bac-test.com/bacnet-test-client-download )
+        BITS: BIT00040
+        Any discussions can be directed to edward@bac-test.com
+        Please feel free to remove this comment when my changes accepted after suitable time for
+        review by all interested parties. Say 6 months -> September 2016 */
+        /* In this demo, we are the server only ( BACnet "B" device ) so we do not indicate
+           that we can execute the I-Am message */
+           /* handle i-am to support binding to other devices */
     apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_I_AM, handler_i_am_bind);
 #endif
 
@@ -250,6 +253,7 @@ int main(
     printf("BACnet Server Demo\n" "BACnet Stack Version %s\n"
         "BACnet Device ID: %u\n" "Max APDU: %d\n", BACnet_Version,
         Device_Object_Instance_Number(), MAX_APDU);
+
     /* load any static address bindings to show up
        in our device bindings list */
     address_init();

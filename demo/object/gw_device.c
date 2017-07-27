@@ -64,7 +64,7 @@
 #if defined(__BORLANDC__) || defined(_WIN32)
 /* seems to not be defined in time.h as specified by The Open Group */
 /* difference from UTC and local standard time  */
-long int timezone;
+extern long int timezone;
 #endif
 
 /* local forward and external prototypes */
@@ -380,7 +380,7 @@ bool Routed_Device_Is_Valid_Network(
 uint32_t Routed_Device_Index_To_Instance(
     unsigned index)
 {
-    index = index;
+    (void) index ;
     return Devices[iCurrent_Device_Idx].bacObj.Object_Instance_Number;
 }
 

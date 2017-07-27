@@ -86,7 +86,7 @@ void handler_get_event_information(
     int len = 0;
     int pdu_len = 0;
     int apdu_len = 0;
-    BACNET_NPDU_DATA npdu_data;
+    BACNET_NPCI_DATA npci_data;
     bool error = false;
     bool more_events = false;
     int bytes_sent = 0;
@@ -103,10 +103,10 @@ void handler_get_event_information(
 
     /* encode the NPDU portion of the packet */
     datalink_get_my_address(&my_address);
-    npdu_encode_npdu_data(&npdu_data, false, MESSAGE_PRIORITY_NORMAL);
+    npdu_setup_npci_data(&npci_data, false, MESSAGE_PRIORITY_NORMAL);
     pdu_len =
         npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
-        &npdu_data);
+        &npci_data);
     if (service_data->segmented_message) {
         /* we don't support segmentation - send an abort */
         len =
@@ -115,14 +115,14 @@ void handler_get_event_information(
             true);
 #if PRINT_ENABLED
         fprintf(stderr,
-            "GetEventInformation: " "Segmented message. Sending Abort!\n");
+                "GetEventInformation: " "Segmented message. Sending Abort!\n");
 #endif
         goto GET_EVENT_ABORT;
     }
 
     len =
         getevent_decode_service_request(service_request, service_len,
-        &object_id);
+                                        &object_id);
     if (len < 0) {
         /* bad decoding - send an abort */
         len =
@@ -130,7 +130,7 @@ void handler_get_event_information(
             service_data->invoke_id, ABORT_REASON_OTHER, true);
 #if PRINT_ENABLED
         fprintf(stderr,
-            "GetEventInformation: Bad Encoding.  Sending Abort!\n");
+                "GetEventInformation: Bad Encoding.  Sending Abort!\n");
 #endif
         goto GET_EVENT_ABORT;
     }
@@ -205,11 +205,11 @@ void handler_get_event_information(
 #if PRINT_ENABLED
     fprintf(stderr, "Got a GetEventInformation request: Sending Ack!\n");
 #endif
-  GET_EVENT_ERROR:
+GET_EVENT_ERROR:
     if (error) {
         pdu_len =
             npdu_encode_pdu(&Handler_Transmit_Buffer[0], src, &my_address,
-            &npdu_data);
+            &npci_data);
 
         if (len == -2) {
             /* BACnet APDU too small to fit data, so proper response is Abort */
@@ -231,15 +231,14 @@ void handler_get_event_information(
 #endif
         }
     }
-  GET_EVENT_ABORT:
+GET_EVENT_ABORT:
     pdu_len += len;
     bytes_sent =
-        datalink_send_pdu(src, &npdu_data, &Handler_Transmit_Buffer[0],
+        datalink_send_pdu(src, &npci_data, &Handler_Transmit_Buffer[0],
         pdu_len);
 #if PRINT_ENABLED
     if (bytes_sent <= 0)
         fprintf(stderr, "Failed to send PDU (%s)!\n", strerror(errno));
 #endif
 
-    return;
 }

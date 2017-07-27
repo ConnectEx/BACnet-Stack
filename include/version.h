@@ -34,6 +34,9 @@
 #define BACNET_VERSION_MAJOR ((BACNET_VERSION_CODE>>16)&0xFF)
 #define BACNET_VERSION_MINOR ((BACNET_VERSION_CODE>>8)&0xFF)
 #define BACNET_VERSION_MAINTENANCE (BACNET_VERSION_CODE&0xFF)
-extern char *BACnet_Version;
+
+
+// extern char *BACnet_Version;
+
 
 #endif

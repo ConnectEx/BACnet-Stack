@@ -28,9 +28,6 @@
 #include "event.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 
 #define NC_RESCAN_RECIPIENTS_SECS   60
@@ -92,15 +89,15 @@ BACnetRecipient ::= CHOICE {
 /* Information needed to send AckNotification */
     typedef struct Ack_Notification {
         bool bSendAckNotify;    /* true if need to send AckNotification */
-        uint8_t EventState;
+        BACNET_EVENT_STATE EventState;
     } ACK_NOTIFICATION;
 
 
 
     void Notification_Class_Property_Lists(
-        const int **pRequired,
-        const int **pOptional,
-        const int **pProprietary);
+        const BACNET_PROPERTY_ID **pRequired,
+        const BACNET_PROPERTY_ID **pOptional,
+        const BACNET_PROPERTY_ID **pProprietary);
 
     void Notification_Class_Init(
         void);
@@ -135,7 +132,4 @@ BACnetRecipient ::= CHOICE {
 #endif /* defined(INTRINSIC_REPORTING) */
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 #endif /* NC_H */

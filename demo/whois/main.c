@@ -135,7 +135,6 @@ void address_table_add(
     pMatch->max_apdu = max_apdu;
     pMatch->address = *src;
 
-    return;
 }
 
 
@@ -184,13 +183,12 @@ void my_i_am_handler(
 #endif
     }
 
-    return;
 }
 
 void MyAbortHandler(
     BACNET_ADDRESS * src,
     uint8_t invoke_id,
-    uint8_t abort_reason,
+    BACNET_ABORT_REASON abort_reason,
     bool server)
 {
     /* FIXME: verify src and invoke id */
@@ -301,7 +299,7 @@ static void print_address_cache(
 }
 
 static void print_usage(
-    char *filename)
+    const char *filename)
 {
     printf("Usage: %s", filename);
     printf(" [device-instance-min [device-instance-max]]\n");
@@ -310,7 +308,7 @@ static void print_usage(
 }
 
 static void print_help(
-    char *filename)
+    const char *filename)
 {
     printf("Send BACnet WhoIs service request to a device or multiple\n"
         "devices, and wait for responses. Displays any devices found\n"
@@ -376,7 +374,7 @@ int main(
     bool global_broadcast = true;
     int argi = 0;
     unsigned int target_args = 0;
-    char *filename = NULL;
+    const char *filename = NULL;
 
     /* decode any command line parameters */
     filename = filename_remove_path(argv[0]);
@@ -500,12 +498,14 @@ int main(
             bvlc_maintenance_timer(elapsed_seconds);
 #endif
         }
+        
         total_seconds += elapsed_seconds;
         if (total_seconds > timeout_seconds)
             break;
         /* keep track of time for next check */
         last_seconds = current_seconds;
     }
+    
     print_address_cache();
 
     return 0;

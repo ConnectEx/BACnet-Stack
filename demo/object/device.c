@@ -94,6 +94,8 @@ extern int Routed_Device_Read_Property_Local(
 extern bool Routed_Device_Write_Property_Local(
     BACNET_WRITE_PROPERTY_DATA * wp_data);
 
+extern const char *BACnet_Version;
+
 /* may be overridden by outside table */
 static object_functions_t *Object_Table;
 
@@ -555,7 +557,6 @@ void Device_Objects_Property_List(
         pPropertyList->Proprietary.pList ==
         NULL ? 0 : property_list_count(pPropertyList->Proprietary.pList);
 
-    return;
 }
 
 /** Commands a Device re-initialization, to a given state.
@@ -576,7 +577,7 @@ bool Device_Reinitialize(
 {
     bool status = false;
 
-    if (characterstring_ansi_same(&rd_data->password, "Jesus")) {
+    if (characterstring_ansi_same(&rd_data->password, "BACnet Testing")) {
         switch (rd_data->state) {
             case BACNET_REINIT_COLDSTART:
             case BACNET_REINIT_WARMSTART:
@@ -610,7 +611,7 @@ bool Device_Reinitialize(
 }
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const int Device_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Device_Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -631,10 +632,10 @@ static const int Device_Properties_Required[] = {
     PROP_NUMBER_OF_APDU_RETRIES,
     PROP_DEVICE_ADDRESS_BINDING,
     PROP_DATABASE_REVISION,
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Device_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Device_Properties_Optional[] = {
 #if defined(BACDL_MSTP)
     PROP_MAX_MASTER,
     PROP_MAX_INFO_FRAMES,
@@ -652,17 +653,17 @@ static const int Device_Properties_Optional[] = {
     PROP_ALIGN_INTERVALS,
     PROP_INTERVAL_OFFSET,
 #endif
-    -1
+    MAX_BACNET_PROPERTY_ID
 };
 
-static const int Device_Properties_Proprietary[] = {
-    -1
+static const BACNET_PROPERTY_ID Device_Properties_Proprietary[] = {
+    MAX_BACNET_PROPERTY_ID
 };
 
 void Device_Property_Lists(
-    const int **pRequired,
-    const int **pOptional,
-    const int **pProprietary)
+    const BACNET_PROPERTY_ID **pRequired,
+    const BACNET_PROPERTY_ID **pOptional,
+    const BACNET_PROPERTY_ID **pProprietary)
 {
     if (pRequired)
         *pRequired = Device_Properties_Required;
@@ -671,7 +672,6 @@ void Device_Property_Lists(
     if (pProprietary)
         *pProprietary = Device_Properties_Proprietary;
 
-    return;
 }
 
 /* note: you really only need to define variables for
@@ -735,7 +735,7 @@ unsigned Device_Count(
 uint32_t Device_Index_To_Instance(
     unsigned index)
 {
-    index = index;
+    (void) index ;
     return Object_Instance_Number;
 }
 
@@ -1069,7 +1069,7 @@ unsigned Device_Object_List_Count(
  */
 bool Device_Object_List_Identifier(
     uint32_t array_index,
-    int *object_type,
+    BACNET_OBJECT_TYPE *object_type,
     uint32_t * instance)
 {
     bool status = false;
@@ -1128,11 +1128,11 @@ bool Device_Object_List_Identifier(
  */
 bool Device_Valid_Object_Name(
     BACNET_CHARACTER_STRING * object_name1,
-    int *object_type,
+    BACNET_OBJECT_TYPE *object_type,
     uint32_t * object_instance)
 {
     bool found = false;
-    int type = 0;
+    BACNET_OBJECT_TYPE type ;
     uint32_t instance;
     uint32_t max_objects = 0, i = 0;
     bool check_id = false;
@@ -1168,7 +1168,7 @@ bool Device_Valid_Object_Name(
  * @return True if found, else False if no such Object in this device.
  */
 bool Device_Valid_Object_Id(
-    int object_type,
+    BACNET_OBJECT_TYPE object_type,
     uint32_t object_instance)
 {
     bool status = false;        /* return value */
@@ -1370,7 +1370,7 @@ int Device_Read_Property_Local(
     BACNET_BIT_STRING bit_string = { 0 };
     BACNET_CHARACTER_STRING char_string = { 0 };
     uint32_t i = 0;
-    int object_type = 0;
+    BACNET_OBJECT_TYPE object_type ;
     uint32_t instance = 0;
     uint32_t count = 0;
     uint8_t *apdu = NULL;
@@ -1672,7 +1672,7 @@ bool Device_Write_Property_Local(
     bool status = false;        /* return value */
     int len = 0;
     BACNET_APPLICATION_DATA_VALUE value;
-    int object_type = 0;
+    BACNET_OBJECT_TYPE object_type ;
     uint32_t object_instance = 0;
     uint32_t minutes = 0;
     int temp;
@@ -2079,7 +2079,7 @@ void Device_local_reporting(
     struct object_functions *pObject;
     uint32_t objects_count;
     uint32_t object_instance;
-    int object_type;
+    BACNET_OBJECT_TYPE object_type;
     uint32_t idx;
 
     objects_count = Device_Object_List_Count();
@@ -2208,6 +2208,7 @@ bool DeviceGetRRInfo(
 
 
 #ifdef BAC_ROUTING
+
 /****************************************************************************
  ************* BACnet Routing Functionality (Optional) **********************
  ****************************************************************************
@@ -2318,7 +2319,6 @@ void testDevice(
     Device_Set_Model_Name(name, strlen(name));
     ct_test(pTest, strcmp(Device_Model_Name(), name) == 0);
 
-    return;
 }
 
 #ifdef TEST_DEVICE
