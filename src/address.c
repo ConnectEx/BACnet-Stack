@@ -29,8 +29,24 @@
  This exception does not invalidate any other reasons why a work
  based on this file might be covered by the GNU General Public
  License.
- -------------------------------------------
-####COPYRIGHTEND####*/
+
+*
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -42,6 +58,8 @@
 #include "bacdef.h"
 #include "bacdcode.h"
 #include "readrange.h"
+#include "debug.h"
+#include "bactext.h"
 
 /** @file address.c  Handle address binding */
 
@@ -49,15 +67,25 @@
 /* occurs in BACnet.  A device id is bound to a MAC address. */
 /* The normal method is using Who-Is, and using the data from I-Am */
 
+/* Ed's notes:
+    The address table is unique per device; the path to the peer depends on the devices location on the BACnet network.
+    The address table as constructed cannot be written to by a bacnet client. It contains data (local mac) that is not accessible via the client interface. Ever. Per the spec...
+        (It can, and must be readable, but only the BACnetAddressBinding is visible  i.e. BACnetAddressBinding := deviceId / bacnetAddress   bacnetAddress := net / mac)
+        (Unless of course, who-is-router, or 'router binding' table is added, which, once again, is not visible per the spec.)
+
+    For virtual devices, it can be, and it is, shared between all virtual devices and the application device, since all those that we will ever be interested in are 'external' to 
+    this collection of nodes
+*/
+
 static uint32_t Top_Protected_Entry;
 static uint32_t Own_Device_ID = 0xFFFFFFFF;
 
 static struct Address_Cache_Entry {
-    uint8_t Flags;
-    uint32_t device_id;
+    uint8_t         Flags;
+    uint32_t        device_id;
     unsigned max_apdu;
     BACNET_ADDRESS address;
-    uint32_t TimeToLive;
+    uint32_t        TimeToLive;
 } Address_Cache[MAX_ADDRESS_CACHE];
 
 /* State flags for cache entries */
@@ -65,7 +93,7 @@ static struct Address_Cache_Entry {
 #define BAC_ADDR_IN_USE    1    /* Address cache entry in use */
 #define BAC_ADDR_BIND_REQ  2    /* Bind request outstanding for entry */
 #define BAC_ADDR_STATIC    4    /* Static address mapping - does not expire */
-#define BAC_ADDR_SHORT_TTL 8    /* Oppertunistaclly added address with short TTL */
+#define BAC_ADDR_SHORT_TTL 8    /* Opportunistically added address with short TTL */
 #define BAC_ADDR_RESERVED  128  /* Freed up but held for caller to fill */
 
 #define BAC_ADDR_SECS_1HOUR 3600        /* 60x60 */
@@ -75,6 +103,24 @@ static struct Address_Cache_Entry {
 #define BAC_ADDR_SHORT_TIME BAC_ADDR_SECS_1HOUR
 #define BAC_ADDR_FOREVER    0xFFFFFFFF  /* Permanent entry */
 
+#if defined ( _MSC_VER  )
+void print_address_cache(void)
+{
+//    char tbuf[100];
+    printf("\nAddress cache:");
+    printf("\n      Inst  APDU  Path                                                 TTL  Flags");
+    for (int i = 0; i < MAX_ADDRESS_CACHE; i++)
+    {
+        printf("\n   %7d  %4u  %21s  %5d  %02x",
+            Address_Cache[i].device_id,
+            Address_Cache[i].max_apdu,
+            "mxxxx", // bactext_bacnet_path ( tbuf, &Address_Cache[i].address.bacnetPath ), 
+            Address_Cache[i].TimeToLive,
+            Address_Cache[i].Flags
+            );
+    }
+}
+#endif
 
 void address_protected_entry_index_set(uint32_t top_protected_entry_index)
 {
@@ -350,7 +396,6 @@ static void address_file_init(
 
 }
 
-
 /****************************************************************************
  * Clear down the cache and make sure the full complement of entries are    *
  * available. Assume no persistance of memory.                              *
@@ -368,9 +413,11 @@ void address_init(
         pMatch->Flags = 0;
         pMatch++;
     }
+#ifdef BACNET_ADDRESS_CACHE_FILE
     address_file_init(Address_Cache_Filename);
-
+#endif
 }
+
 
 /****************************************************************************
  * Clear down the cache of any non bound, expired  or reserved entries.     *
@@ -399,7 +446,9 @@ void address_init_partial(
 
         pMatch++;
     }
+#if ( USE_FILE_CACHE == 1 )
     address_file_init(Address_Cache_Filename);
+#endif
 
 }
 
@@ -804,15 +853,15 @@ int rr_address_list_encode(
     BACNET_READ_RANGE_DATA * pRequest)
 {
     int iLen = 0;
-    int32_t iTemp = 0;
-    struct Address_Cache_Entry *pMatch = NULL;
+    int32_t iTemp;
+    struct Address_Cache_Entry *pMatch;
     BACNET_OCTET_STRING MAC_Address;
-    uint32_t uiTotal = 0;       /* Number of bound entries in the cache */
-    uint32_t uiIndex = 0;       /* Current entry number */
-    uint32_t uiFirst = 0;       /* Entry number we started encoding from */
+    uint32_t uiTotal;       /* Number of bound entries in the cache */
+    uint32_t uiIndex;       /* Current entry number */
+    uint32_t uiFirst;       /* Entry number we started encoding from */
     uint32_t uiLast = 0;        /* Entry number we finished encoding on */
-    uint32_t uiTarget = 0;      /* Last entry we are required to encode */
-    uint32_t uiRemaining = 0;   /* Amount of unused space in packet */
+    uint32_t uiTarget;      /* Last entry we are required to encode */
+    uint32_t uiRemaining;   /* Amount of unused space in packet */
 
     /* Initialise result flags to all false */
     bitstring_init(&pRequest->ResultFlags);
@@ -950,6 +999,8 @@ int rr_address_list_encode(
  * entries never expire unless explictely deleted.                          *
  ****************************************************************************/
 
+// seems like Karg does not reissue who-is for unbound addresses. Resolve. todo2
+
 void address_cache_timer(
     uint16_t uSeconds)
 {       /* Approximate number of seconds since last call to this function */
@@ -1028,6 +1079,7 @@ static void set_file_address(
     }
 }
 
+#ifdef BACNET_ADDRESS_CACHE_FILE
 void testAddressFile(
     Test * pTest)
 {
@@ -1074,6 +1126,7 @@ void testAddressFile(
     ct_test(pTest, bacnet_address_same(&test_address, &src));
 
 }
+#endif
 
 void testAddress(
     Test * pTest)
@@ -1135,8 +1188,10 @@ int main(
     /* individual tests */
     rc = ct_addTestFunction(pTest, testAddress);
     assert(rc);
+#ifdef BACNET_ADDRESS_CACHE_FILE
     rc = ct_addTestFunction(pTest, testAddressFile);
     assert(rc);
+#endif
 
 
     ct_setStream(pTest, stdout);

@@ -1,47 +1,62 @@
 /**************************************************************************
+ *
+ * Copyright (C) 2005 Steve Karg <skarg@users.sourceforge.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-* Copyright (C) 2006 Steve Karg <skarg@users.sourceforge.net>
+*****************************************************************************************
 *
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files (the
-* "Software"), to deal in the Software without restriction, including
-* without limitation the rights to use, copy, modify, merge, publish,
-* distribute, sublicense, and/or sell copies of the Software, and to
-* permit persons to whom the Software is furnished to do so, subject to
-* the following conditions:
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
 *
-* The above copyright notice and this permission notice shall be included
-* in all copies or substantial portions of the Software.
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
 *
-*********************************************************************/
+****************************************************************************************/
 
-/* Binary Input Objects customize for your use */
-
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include "bacdef.h"
-#include "bacdcode.h"
-#include "bacenum.h"
-#include "bacapp.h"
-#include "rp.h"
-#include "wp.h"
-#include "cov.h"
+//#include <stdbool.h>
+//#include <stdint.h>
+//#include <stdio.h>
+//
+//#include "platform.h"
+//#include "bacdef.h"
+//#include "bacdcode.h"
+//#include "bacenum.h"
+//#include "bactext.h"
 #include "config.h"     /* the custom stuff */
+#if (BACNET_USE_OBJECT_BINARY_INPUT == 1 )
 #include "bi.h"
 #include "handlers.h"
+#include "bitsDebug.h"
 
 #ifndef MAX_BINARY_INPUTS
 #define MAX_BINARY_INPUTS 5
 #endif
+
+#define POLARITY_READ_ONLY		0
 
 /* stores the current value */
 static BACNET_BINARY_PV Present_Value[MAX_BINARY_INPUTS];
@@ -53,7 +68,7 @@ static bool Change_Of_Value[MAX_BINARY_INPUTS];
 static BACNET_POLARITY Polarity[MAX_BINARY_INPUTS];
 
 /* These three arrays are used by the ReadPropertyMultiple handler */
-static const BACNET_PROPERTY_ID Binary_Input_Properties_Required[] = {
+static const BACNET_PROPERTY_ID Properties_Required[] = {
     PROP_OBJECT_IDENTIFIER,
     PROP_OBJECT_NAME,
     PROP_OBJECT_TYPE,
@@ -65,13 +80,15 @@ static const BACNET_PROPERTY_ID Binary_Input_Properties_Required[] = {
     MAX_BACNET_PROPERTY_ID
 };
 
-static const BACNET_PROPERTY_ID Binary_Input_Properties_Optional[] = {
+static const BACNET_PROPERTY_ID Properties_Optional[] = {
     PROP_DESCRIPTION,
-	PROP_RELIABILITY,
+    PROP_ACTIVE_TEXT,
+    PROP_INACTIVE_TEXT,
+    PROP_RELIABILITY,
     MAX_BACNET_PROPERTY_ID
 };
 
-static const BACNET_PROPERTY_ID Binary_Input_Properties_Proprietary[] = {
+static const BACNET_PROPERTY_ID Properties_Proprietary[] = {
     MAX_BACNET_PROPERTY_ID
 };
 
@@ -80,17 +97,14 @@ void Binary_Input_Property_Lists(
     const BACNET_PROPERTY_ID **pOptional,
     const BACNET_PROPERTY_ID **pProprietary)
 {
-    if (pRequired) {
-        *pRequired = Binary_Input_Properties_Required;
-    }
-    if (pOptional) {
-        *pOptional = Binary_Input_Properties_Optional;
-    }
-    if (pProprietary) {
-        *pProprietary = Binary_Input_Properties_Proprietary;
-    }
-
+    if (pRequired)
+        *pRequired = Properties_Required;
+    if (pOptional)
+        *pOptional = Properties_Optional;
+    if (pProprietary)
+        *pProprietary = Properties_Proprietary;
 }
+
 
 /* we simply have 0-n object instances.  Yours might be */
 /* more complex, and then you need validate that the */
@@ -150,7 +164,7 @@ unsigned Binary_Input_Instance_To_Index(
     if (object_instance < MAX_BINARY_INPUTS) {
         index = object_instance;
     }
-
+    dbTraffic(DBD_ALL, DB_BTC_ERROR, "Illegal index, %s, %d", __FILE__, __LINE__);
     return index;
 }
 
@@ -203,6 +217,7 @@ bool Binary_Input_Change_Of_Value(
     return status;
 }
 
+
 void Binary_Input_Change_Of_Value_Clear(
     uint32_t object_instance)
 {
@@ -234,7 +249,7 @@ bool Binary_Input_Encode_Value_List(
         value_list->propertyArrayIndex = BACNET_ARRAY_ALL;
         value_list->value.context_specific = false;
         value_list->value.tag = BACNET_APPLICATION_TAG_ENUMERATED;
-        value_list->value.next = NULL;
+        value_list->value.next = NULL;			/* 2014.09.03 - edward@bac-test.com - added this, lack was causing exceptions under MSVC emulation */
         value_list->value.type.Enumerated =
             Binary_Input_Present_Value(object_instance);
         value_list->priority = BACNET_NO_PRIORITY;
@@ -245,7 +260,7 @@ bool Binary_Input_Encode_Value_List(
         value_list->propertyArrayIndex = BACNET_ARRAY_ALL;
         value_list->value.context_specific = false;
         value_list->value.tag = BACNET_APPLICATION_TAG_BIT_STRING;
-        value_list->value.next = NULL;
+        value_list->value.next = NULL;			/* 2014.09.03 - edward@bac-test.com - added this, lack was causing exceptions under MSVC emulation */
         bitstring_init(&value_list->value.type.Bit_String);
         bitstring_set_bit(&value_list->value.type.Bit_String,
             STATUS_FLAG_IN_ALARM, false);
@@ -342,6 +357,7 @@ BACNET_POLARITY Binary_Input_Polarity(
     return polarity;
 }
 
+#if ( POLARITY_READ_ONLY == 0 )
 bool Binary_Input_Polarity_Set(
     uint32_t object_instance,
     BACNET_POLARITY polarity)
@@ -356,6 +372,8 @@ bool Binary_Input_Polarity_Set(
 
     return status;
 }
+#endif
+
 
 /* return apdu length, or BACNET_STATUS_ERROR on error */
 /* assumption - object already exists, and has been bounds checked */
@@ -406,6 +424,7 @@ int Binary_Input_Read_Property(
             bitstring_set_bit(&bit_string, STATUS_FLAG_OUT_OF_SERVICE, state);
             apdu_len = encode_application_bitstring(&apdu[0], &bit_string);
             break;
+
         case PROP_EVENT_STATE:
             /* note: see the details in the standard on how to use this */
             apdu_len =
@@ -489,6 +508,11 @@ bool Binary_Input_Write_Property(
             break;
 
         case PROP_POLARITY:
+	    
+#if ( POLARITY_READ_ONLY == 1 )
+			wp_data->error_class = ERROR_CLASS_PROPERTY;
+			wp_data->error_code = ERROR_CODE_WRITE_ACCESS_DENIED;
+#else
             status =
                 WPValidateArgType(&value, BACNET_APPLICATION_TAG_ENUMERATED,
                 &wp_data->error_class, &wp_data->error_code);
@@ -502,14 +526,24 @@ bool Binary_Input_Write_Property(
                     wp_data->error_code = ERROR_CODE_VALUE_OUT_OF_RANGE;
                 }
             }
+#endif
             break;
 
+        case PROP_DESCRIPTION:
+        case PROP_EVENT_STATE:
         case PROP_OBJECT_IDENTIFIER:
         case PROP_OBJECT_NAME:
-        case PROP_DESCRIPTION:
         case PROP_OBJECT_TYPE:
+        case PROP_PROPERTY_LIST:
+        case PROP_RELIABILITY:
         case PROP_STATUS_FLAGS:
-        case PROP_EVENT_STATE:
+#if (INTRINSIC_REPORTING_BI_B == 1)
+		case PROP_ACKED_TRANSITIONS:
+		case PROP_EVENT_TIME_STAMPS:
+#if ( BACNET_PROTOCOL_REVISION >= 14 )
+		case PROP_EVENT_DETECTION_ENABLE:
+#endif
+#endif
             wp_data->error_class = ERROR_CLASS_PROPERTY;
             wp_data->error_code = ERROR_CODE_WRITE_ACCESS_DENIED;
             break;
@@ -590,3 +624,5 @@ int main(
 }
 #endif /* TEST_BINARY_INPUT */
 #endif /* TEST */
+
+#endif // if (BACNET_USE_OBJECT_BINARY_INPUT == 1 )

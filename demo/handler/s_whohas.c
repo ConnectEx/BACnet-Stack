@@ -21,20 +21,35 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
-#include <stddef.h>
-#include <stdint.h>
-#include <errno.h>
-#include <string.h>
-#include "config.h"
-#include "txbuf.h"
-#include "bacdef.h"
-#include "bacdcode.h"
-#include "address.h"
-#include "tsm.h"
-#include "npdu.h"
-#include "apdu.h"
-#include "device.h"
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
+//#include <stddef.h>
+//#include <stdint.h>
+//#include <errno.h>
+//#include <string.h>
+//#include "config.h"
+//#include "txbuf.h"
+//#include "bacdef.h"
+//#include "bacdcode.h"
+//#include "address.h"
+//#include "tsm.h"
+//#include "npdu.h"
+//#include "apdu.h"
+//#include "device.h"
 #include "datalink.h"
 #include "dcc.h"
 #include "whohas.h"
@@ -91,11 +106,6 @@ void Send_WhoHas_Name(
     bytes_sent =
         datalink_send_pdu(&dest, &npci_data, &Handler_Transmit_Buffer[0],
         pdu_len);
-#if PRINT_ENABLED
-    if (bytes_sent <= 0)
-        fprintf(stderr, "Failed to Send Who-Has Request (%s)!\n",
-            strerror(errno));
-#endif
 }
 
 /** Send a Who-Has request for a device which has a specific Object type and ID.

@@ -20,12 +20,37 @@
 * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*********************************************************************/
+*
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
+#include "config.h"
+
+#if defined(BACDL_BIP) && BBMD_ENABLED
+#include "bbmd.h"
+#endif
+
+// be careful not to replace this with #pragma once without changing the checks in bbmd.h
 #ifndef DATALINK_H
 #define DATALINK_H
 
-#include "config.h"
 #include "bacdef.h"
+
+
+void Init_Datalink_Thread( void )  ;
 
 #if defined(BACDL_ETHERNET)
 #include "ethernet.h"
@@ -71,7 +96,7 @@
 #endif
 #define datalink_cleanup bip_cleanup
 #define datalink_get_broadcast_address bip_get_broadcast_address
-#ifdef BAC_ROUTING
+#if ( BAC_ROUTING == 1 )
 extern void routed_get_my_address(
     BACNET_ADDRESS * my_address);
 #define datalink_get_my_address routed_get_my_address

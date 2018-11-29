@@ -21,7 +21,22 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -110,9 +125,9 @@ void handler_who_has(
 }
 
 
-#ifdef BAC_ROUTING      /* was for BAC_ROUTING - delete in 2/2012 if still unused */
-                                                /* EKH: I restored this to BAC_ROUTING (from DEPRECATED) because I found that the server demo with the built-in 
-                                                   virtual Router did not insert the SADRs of the virtual devices on the virtual network without it */
+#if ( BAC_ROUTING == 1 )      /* was for BAC_ROUTING - delete in 2/2012 if still unused */
+/* EKH: I restored this to BAC_ROUTING (from DEPRECATED) because I found that the server demo with the built-in
+		virtual Router did not insert the SADRs of the virtual devices on the virtual network without it */
 
 /** Handler for Who-Has requests in the virtual routing setup,
  * with broadcast I-Have response.

@@ -4,6 +4,8 @@
 # Most platforms have this already defined
 # CC = gcc
 
+# set before CFLAGS=-std=gnu11
+
 # Executable file name
 TARGET = bacserv
 
@@ -20,6 +22,7 @@ OBJECT_SRC = \
 	$(BACNET_OBJECT)/bo.c \
 	$(BACNET_OBJECT)/bv.c \
 	$(BACNET_OBJECT)/channel.c \
+	$(BACNET_OBJECT)/calendar.c \
 	$(BACNET_OBJECT)/command.c \
 	$(BACNET_OBJECT)/csv.c \
 	$(BACNET_OBJECT)/iv.c \
@@ -32,6 +35,7 @@ OBJECT_SRC = \
 	$(BACNET_OBJECT)/osv.c \
 	$(BACNET_OBJECT)/piv.c \
 	$(BACNET_OBJECT)/nc.c  \
+	$(BACNET_OBJECT)/netport.c  \
 	$(BACNET_OBJECT)/trendlog.c \
 	$(BACNET_OBJECT)/schedule.c \
 	$(BACNET_OBJECT)/access_credential.c \
@@ -61,6 +65,7 @@ ${BACNET_LIB_TARGET}:
 
 .c.o:
 	${CC} -c ${CFLAGS} $*.c -o $@
+	echo mycflags=${CFLAGS}
 
 depend:
 	rm -f .depend

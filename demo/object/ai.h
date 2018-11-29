@@ -22,7 +22,24 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+*  2018.07.04 EKH Diffed in hints from Binary Value for future reference
+*
+****************************************************************************************/
+
 #ifndef AI_H
 #define AI_H
 
@@ -31,24 +48,36 @@
 #include "bacdef.h"
 #include "rp.h"
 #include "wp.h"
-#if defined(INTRINSIC_REPORTING)
+#include "BACnetObjectAnalog.h"
+
+#if (INTRINSIC_REPORTING_B == 1)
 #include "nc.h"
 #include "getevent.h"
 #include "alarm_ack.h"
-#include "get_alarm_sum.h"
+// Deprecated since Rev 13    #include "get_alarm_sum.h"
 #endif
 
 
 typedef struct analog_input_descr {
-    BACNET_EVENT_STATE Event_State;
+
+    BACNET_OBJECT   common;         // must be first field in structure due to llist
+
     float Present_Value;
-    BACNET_RELIABILITY Reliability;
+    BACNET_ENGINEERING_UNITS Units;
+
     bool Out_Of_Service;
-    uint8_t Units;
+    BACNET_RELIABILITY Reliability;
+    BACNET_RELIABILITY reliabilityShadowValue ;
+    
+#if (BACNET_SVC_COV_B == 1)
+    BACNET_EVENT_STATE Event_State;
     float Prior_Value;
     float COV_Increment;
     bool Changed;
-#if defined(INTRINSIC_REPORTING)
+    bool prior_OOS;
+#endif
+
+#if (INTRINSIC_REPORTING_B == 1)
     uint32_t Time_Delay;
     uint32_t Notification_Class;
     float High_Limit;
@@ -64,7 +93,9 @@ typedef struct analog_input_descr {
     /* AckNotification informations */
     ACK_NOTIFICATION Ack_notify_data;
 #endif
+
 } ANALOG_INPUT_DESCR;
+
 
 void Analog_Input_Property_Lists(
     const BACNET_PROPERTY_ID **pRequired,
@@ -76,22 +107,27 @@ bool Analog_Input_Valid_Instance(
 
 unsigned Analog_Input_Count(
     void);
+
 uint32_t Analog_Input_Index_To_Instance(
     unsigned index);
-unsigned Analog_Input_Instance_To_Index(
-    uint32_t instance);
-bool Analog_Input_Object_Instance_Add(
-    uint32_t instance);
+
+// making static
+//int Analog_Input_Instance_To_Index(
+//    const DEVICE_OBJECT_DATA *pDev,
+//    const uint32_t object_instance);
 
 bool Analog_Input_Object_Name(
     uint32_t object_instance,
     BACNET_CHARACTER_STRING * object_name);
-bool Analog_Input_Name_Set(
-    uint32_t object_instance,
-    char *new_name);
+
+//bool Analog_Input_Name_Set(
+//    DEVICE_OBJECT_DATA *pDev,
+//    uint32_t object_instance,
+//    char *new_name);
 
 char *Analog_Input_Description(
     uint32_t instance);
+
 bool Analog_Input_Description_Set(
     uint32_t instance,
     char *new_name);
@@ -99,66 +135,100 @@ bool Analog_Input_Description_Set(
 bool Analog_Input_Units_Set(
     uint32_t instance,
     uint16_t units);
+
 uint16_t Analog_Input_Units(
     uint32_t instance);
 
 int Analog_Input_Read_Property(
     BACNET_READ_PROPERTY_DATA * rpdata);
+
 bool Analog_Input_Write_Property(
     BACNET_WRITE_PROPERTY_DATA * wp_data);
 
+#if 0
 float Analog_Input_Present_Value(
-    uint32_t object_instance);
+    ANALOG_INPUT_DESCR *currentObject);
+
 void Analog_Input_Present_Value_Set(
-    uint32_t object_instance,
+    ANALOG_INPUT_DESCR *currentObject,
     float value);
 
-bool Analog_Input_Out_Of_Service(
-    uint32_t object_instance);
-void Analog_Input_Out_Of_Service_Set(
-    uint32_t object_instance,
-    bool oos_flag);
+// EKH: 2016.08.07 Obsoleted
+//bool Analog_Input_Out_Of_Service(
+//    DEVICE_OBJECT_DATA *pDev,
+//    uint32_t object_instance);
 
+//void Analog_Input_Out_Of_Service_Set(
+//    DEVICE_OBJECT_DATA *pDev,
+//    const uint32_t object_instance,
+//    const bool oos_flag);
+#endif
+
+#if ( BACNET_SVC_COV_B == 1 )
 bool Analog_Input_Change_Of_Value(
     uint32_t instance);
+
 void Analog_Input_Change_Of_Value_Clear(
     uint32_t instance);
+
 bool Analog_Input_Encode_Value_List(
     uint32_t object_instance,
     BACNET_PROPERTY_VALUE * value_list);
+
+#if 0
 float Analog_Input_COV_Increment(
     uint32_t instance);
+
 void Analog_Input_COV_Increment_Set(
     uint32_t instance,
     float value);
+#endif
+#endif
 
 /* note: header of Intrinsic_Reporting function is required
    even when INTRINSIC_REPORTING is not defined */
 void Analog_Input_Intrinsic_Reporting(
     uint32_t object_instance);
 
-#if defined(INTRINSIC_REPORTING)
+#if (INTRINSIC_REPORTING_B == 1)
 int Analog_Input_Event_Information(
     unsigned index,
     BACNET_GET_EVENT_INFORMATION_DATA * getevent_data);
 
 int Analog_Input_Alarm_Ack(
     BACNET_ALARM_ACK_DATA * alarmack_data,
+    BACNET_ERROR_CLASS * error_class,
     BACNET_ERROR_CODE * error_code);
 
-int Analog_Input_Alarm_Summary(
-    unsigned index,
-    BACNET_GET_ALARM_SUMMARY_DATA * getalarm_data);
+// Deprecated since Rev 13   
+//int Analog_Input_Alarm_Summary(
+//    unsigned index,
+//    BACNET_GET_ALARM_SUMMARY_DATA * getalarm_data);
 #endif
 
 bool Analog_Input_Create(
-    uint32_t object_instance);
+    const uint32_t instance,
+    const char *name );
+
+void Analog_Input_Update(
+	const uint32_t instance,
+	const double value );
+
+double Analog_Input_Present_Value_from_Instance ( 
+    const uint32_t instance ) ;
+
 bool Analog_Input_Delete(
     uint32_t object_instance);
+
 void Analog_Input_Cleanup(
     void);
+
 void Analog_Input_Init(
     void);
+
+//AnalogInputObject *Analog_Input_Instance_To_Object(
+//    DEVICE_OBJECT_DATA *pDev,
+//    uint32_t object_instance);
 
 #ifdef TEST
 #include "ctest.h"
@@ -166,4 +236,4 @@ void testAnalogInput(
     Test * pTest);
 #endif
 
-#endif
+#endif /* AI_H */

@@ -21,7 +21,22 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #ifndef CLIENT_H
 #define CLIENT_H
 
@@ -161,7 +176,9 @@
         int application_data_len,
         uint8_t priority,
         uint32_t array_index);
-    uint8_t Send_Write_Property_Multiple_Request_Data(
+    uint8_t Send_Write_Property_Multiple_Request(
+        uint8_t * pdu,
+        size_t max_pdu,
         uint32_t device_id,
         BACNET_WRITE_ACCESS_DATA * write_access_data);
 
@@ -181,10 +198,12 @@
     void Send_TimeSync(
         BACNET_DATE * bdate,
         BACNET_TIME * btime);
+
     void Send_TimeSync_Remote(
         BACNET_ADDRESS * dest,
         BACNET_DATE * bdate,
         BACNET_TIME * btime);
+
     void Send_TimeSyncUTC(
         BACNET_DATE * bdate,
         BACNET_TIME * btime);

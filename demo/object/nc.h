@@ -21,19 +21,33 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #ifndef NC_H
 #define NC_H
 
 #include "event.h"
-
-
-
+#include "listmanip.h"
 
 #define NC_RESCAN_RECIPIENTS_SECS   60
 
 /* max "length" of recipient_list */
 #define NC_MAX_RECIPIENTS 10
+
 /* Recipient types */
     typedef enum {
         RECIPIENT_TYPE_NOTINITIALIZED = 0,
@@ -42,13 +56,20 @@
     } NC_RECIPIENT_TYPE;
 
 
-#if defined(INTRINSIC_REPORTING)
+#if (INTRINSIC_REPORTING_B == 1)
 /* BACnetRecipient structure */
 /*
+
+BACnetAddress ::= SEQUENCE {
+    network-number 	Unsigned16, -- A value of 0 indicates the local network
+    mac-address 	OCTET STRING -- A string of length 0 indicates a broadcast
+    }
+
 BACnetRecipient ::= CHOICE {
     device [0] BACnetObjectIdentifier,
     address [1] BACnetAddress
-}
+    }
+
 */
     typedef struct BACnet_Recipient {
         uint8_t RecipientType;  /* Type of Recipient */
@@ -60,15 +81,15 @@ BACnetRecipient ::= CHOICE {
 
 
 /* BACnetDestination structure */
-    typedef struct BACnet_Destination {
-        uint8_t ValidDays;
-        BACNET_TIME FromTime;
-        BACNET_TIME ToTime;
-        BACNET_RECIPIENT Recipient;
-        uint32_t ProcessIdentifier;
-        uint8_t Transitions;
-        bool ConfirmedNotify;
-    } BACNET_DESTINATION;
+typedef struct BACnet_Destination {		// Be careful adding fields to this structure, it is mem-compared for equality in add/remove list
+    uint8_t     ValidDays;				// bitfield, not typedef
+    BACNET_TIME FromTime;
+    BACNET_TIME ToTime;
+    BACNET_RECIPIENT Recipient;
+    uint32_t ProcessIdentifier;
+    uint8_t Transitions;
+    bool ConfirmedNotify;
+} BACNET_DESTINATION;
 
 
 /* Structure containing configuration for a Notification Class */
@@ -80,17 +101,17 @@ BACnetRecipient ::= CHOICE {
 
 
 /* Indicates whether the transaction has been confirmed */
-    typedef struct Acked_info {
-        bool bIsAcked;  /* true when transitions is acked */
-        BACNET_DATE_TIME Time_Stamp;    /* time stamp of when a alarm was generated */
-    } ACKED_INFO;
+typedef struct Acked_info {
+    bool bIsAcked;  /* true when transitions is acked */
+    BACNET_DATE_TIME Time_Stamp;    /* time stamp of when a alarm was generated */
+} ACKED_INFO;
 
 
 /* Information needed to send AckNotification */
-    typedef struct Ack_Notification {
-        bool bSendAckNotify;    /* true if need to send AckNotification */
-        BACNET_EVENT_STATE EventState;
-    } ACK_NOTIFICATION;
+typedef struct Ack_Notification {
+    bool                bSendAckNotify;    /* true if need to send AckNotification */
+    BACNET_EVENT_STATE  EventState;
+} ACK_NOTIFICATION;
 
 
 
@@ -129,7 +150,14 @@ BACnetRecipient ::= CHOICE {
 
     void Notification_Class_find_recipient(
         void);
-#endif /* defined(INTRINSIC_REPORTING) */
+        
+#if ( BACNET_SVC_LIST_MANIPULATION_B == 1 )
+	bool Notification_Class_Add_List_Element(
+		BACNET_LIST_MANIPULATION_DATA * lmdata);
 
+	bool Notification_Class_Remove_List_Element(
+		BACNET_LIST_MANIPULATION_DATA * lmdata);
+#endif
 
+#endif /* (INTRINSIC_REPORTING_B == 1) */
 #endif /* NC_H */

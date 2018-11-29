@@ -29,8 +29,23 @@
  This exception does not invalidate any other reasons why a work
  based on this file might be covered by the GNU General Public
  License.
- -------------------------------------------
-####COPYRIGHTEND####*/
+*
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "bacdcode.h"
@@ -41,9 +56,9 @@
 /** @file bacdevobjpropref.c  BACnet Application Device Object (Property) Reference */
 
 int bacapp_encode_context_device_obj_property_ref(
-    uint8_t * apdu,
+    uint8_t *apdu,
     uint8_t tag_number,
-    BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE * value)
+    BACNET_DEVICE_OBJECT_PROPERTY_REFERENCE *value)
 {
     int len;
     int apdu_len = 0;
@@ -319,6 +334,7 @@ int bacapp_decode_context_device_obj_ref(
     }
     return len;
 }
+
 
 #ifdef TEST
 #include <assert.h>

@@ -21,7 +21,21 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
 
 /** @file epics/main.c  Command line tool to build a full VTS3 EPICS file,
  *                          including the heading information. */
@@ -231,7 +245,7 @@ void MyAbortHandler(
 void MyRejectHandler(
     BACNET_ADDRESS * src,
     uint8_t invoke_id,
-    uint8_t reject_reason)
+    BACNET_REJECT_REASON reject_reason)
 {
     if (address_match(&Target_Address, src) &&
         (invoke_id == Request_Invoke_ID)) {
@@ -328,7 +342,7 @@ static void Init_Service_Handlers(
 
     /* we need to handle who-is
        to support dynamic device binding to us */
-    apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_WHO_IS, handler_who_is);
+    apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_WHO_IS, handler_who_is_unicast);
     /* handle i-am to support binding to other devices */
     apdu_set_unconfirmed_handler(SERVICE_UNCONFIRMED_I_AM, handler_i_am_bind);
     /* set the handler for all the services we don't implement
@@ -1213,7 +1227,7 @@ void PrintHeading(
     printf("-- AE-ACK-B\n");
     printf("-- AE-ACK-A\n");
     printf("-- DM-UTC-B\n");
-#ifdef BAC_ROUTING
+#if ( BAC_ROUTING == 1 )
     /* Next line only for the gateway (ie, if not addressing a subNet) */
     if (Target_Address.net == 0)
         printf("-- NM-RC-B\n");
@@ -1254,7 +1268,7 @@ void PrintHeading(
         printf("-- ReadRange                      Initiate Execute\n");
         printf("-- GetEventInformation            Initiate Execute\n");
         printf("-- SubscribeCOVProperty           Initiate Execute\n");
-#ifdef BAC_ROUTING
+#if ( BAC_ROUTING == 1 )
         if (Target_Address.net == 0) {
             printf
                 ("-- Note: The following Routing Services are Supported:\n");
@@ -1468,11 +1482,13 @@ int main(
     current_seconds = time(NULL);
     timeout_seconds = (apdu_timeout() / 1000) * apdu_retries();
 
-#if defined(BACDL_BIP)
-    if (My_BIP_Port > 0) {
-        bip_set_port(htons(0xBAC0));    /* Set back to std BACnet/IP port */
-    }
-#endif
+// 2017.07.04 Why set this back to 0xBAC0 when above we used the -p switch to explicitly set it so some other?
+//#if defined(BACDL_BIP)
+//    if (My_BIP_Port > 0) {
+//        bip_set_port(htons(0xBAC0));    /* Set back to std BACnet/IP port */
+//    }
+//#endif
+
     /* try to bind with the target device */
     found =
         address_bind_request(Target_Device_Object_Instance, &max_apdu,

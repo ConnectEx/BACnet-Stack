@@ -1,47 +1,86 @@
 /**************************************************************************
- *
- * Copyright (C) 2004 Steve Karg <skarg@users.sourceforge.net>
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- *********************************************************************/
+*
+* Copyright (C) 2004 Steve Karg <skarg@users.sourceforge.net>
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files (the
+* "Software"), to deal in the Software without restriction, including
+* without limitation the rights to use, copy, modify, merge, publish,
+* distribute, sublicense, and/or sell copies of the Software, and to
+* permit persons to whom the Software is furnished to do so, subject to
+* the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* Note: these defines can be defined in your makefile or project
- or here or not defined and defaults will be used */
+#ifdef _MSC_VER
+	// The Visual Studio automatically defines _DEBUG symbol for Debug builds(and NDEBUG for non - debug builds).
+#ifndef BAC_DEBUG
+#if _DEBUG
+#define BAC_DEBUG	1
+#else
+#define BAC_DEBUG	0
+#endif
+#endif
+#endif
+
+/* Although this stack can implement a later revision,
+* sometimes another revision is desired */
+#ifndef BACNET_PROTOCOL_REVISION
+#define BACNET_PROTOCOL_REVISION 17
+#endif
+
+/* Note: these defines can be defined in your makefile or project or MSVC Property Sheets
+   or here or not defined. If not defined, the following defaults will be used: */
 
 /* declare a single physical layer using your compiler define.
- see datalink.h for possible defines. */
+   see datalink.h for possible defines. */
 #if !(defined(BACDL_ETHERNET) || defined(BACDL_ARCNET) || \
     defined(BACDL_MSTP) || defined(BACDL_BIP) || defined(BACDL_BIP6) || \
     defined(BACDL_TEST) || defined(BACDL_ALL))
 #define BACDL_BIP
 #endif
 
-/* optional configuration for BACnet/IP datalink layer */
+// NB: You need to set this to 1 if you e.g. are running on Windows and you have multiple interfaces/adapters/VPNs and 
+// you want to avoid specifying the _specific_ interface you want BACnet to bind to.
+// However, if running the BACnet Server, specify 0 here, and specify the IP address of the interface for your test network as
+// environment variable BACNET_IFACE=192.168.1.<serverip> else you run the risk of not finding the BACnet Server.
+#define USE_INADDR  0
+// todo 2 - help the user by analyzing the situation on startup.
+
+/* optional configuration for BACnet/IP datalink layers */
 #if (defined(BACDL_BIP) || defined(BACDL_ALL))
 /* other BIP defines (define as 1 to enable):
- USE_INADDR - uses INADDR_BROADCAST for broadcast and binds using INADDR_ANY
- USE_CLASSADDR = uses IN_CLASSx_HOST where x=A,B,C or D for broadcast
- */
+    USE_INADDR - uses INADDR_BROADCAST for broadcast and binds using INADDR_ANY
+    USE_CLASSADDR = uses IN_CLASSx_HOST where x=A,B,C or D for broadcast
+*/
 #if !defined(BBMD_ENABLED)
 #define BBMD_ENABLED 1
 #endif
@@ -54,16 +93,7 @@
 #endif
 #endif
 
-// #define BAC_ROUTING	1
 
-/* Enable the Gateway (Routing) functionality here, if desired. */
-#if !defined(MAX_NUM_DEVICES)
-#ifdef BAC_ROUTING
-#define MAX_NUM_DEVICES 3       /* Eg, Gateway + two remote devices */
-#else
-#define MAX_NUM_DEVICES 1       /* Just the one normal BACnet Device Object */
-#endif
-#endif
 
 /* Define your processor architecture as
  Big Endian       (PowerPC,68K,Sparc) or
@@ -71,16 +101,17 @@
  ARM and MIPS can be either - what is the most common? */
 
 // renamed from BIG_ENDIAN to BACNET_STACK_BIG_ENDIAN due to ambiguous collisions with some compilers
+
 #if !defined(BACNET_STACK_BIG_ENDIAN)
 #define BACNET_STACK_BIG_ENDIAN 0
 #endif
 
 /* Define your Vendor Identifier assigned by ASHRAE */
 #if !defined(BACNET_VENDOR_ID)
-#define BACNET_VENDOR_ID 343
+#define BACNET_VENDOR_ID    343
 #endif
 #if !defined(BACNET_VENDOR_NAME)
-#define BACNET_VENDOR_NAME "BITS BACnet Reference Stack"
+#define BACNET_VENDOR_NAME  "BACnet Interoperability Testing Services, Inc."
 #endif
 
 /* Max number of bytes in an APDU. */
@@ -92,7 +123,7 @@
 /* #define MAX_APDU 50 */
 /* #define MAX_APDU 1476 */
 #if defined(BACDL_BIP)
-#define MAX_APDU 1476
+#define MAX_APDU 1024
 /* #define MAX_APDU 128 enable this IP for testing
  readrange so you get the More Follows flag set */
 #elif defined(BACDL_BIP6)
@@ -120,6 +151,7 @@
 #if !defined(MAX_TSM_TRANSACTIONS)
 #define MAX_TSM_TRANSACTIONS 255
 #endif
+
 /* The address cache is used for binding to BACnet devices */
 /* The number of entries corresponds to the number of */
 /* devices that might respond to an I-Am on the network. */
@@ -130,12 +162,13 @@
 #endif
 
 /* some modules have debugging enabled using PRINT_ENABLED */
+// todo 4 - remove all references to this once new dbXxxx() fully implemented.
 #if !defined(PRINT_ENABLED)
 #define PRINT_ENABLED 0
 #endif
 
 /* BACAPP decodes WriteProperty service requests
- Choose the datatypes that your application supports */
+   Choose the datatypes that your application supports */
 #if !(defined(BACAPP_ALL) || \
     defined(BACAPP_MINIMAL) || \
     defined(BACAPP_NULL) || \
@@ -193,11 +226,11 @@
 #endif
 
 #ifndef MAX_CHARACTER_STRING_BYTES
-#define MAX_CHARACTER_STRING_BYTES (MAX_APDU-6)
+#define MAX_CHARACTER_STRING_BYTES 64
 #endif
 
 #ifndef MAX_OCTET_STRING_BYTES
-#define MAX_OCTET_STRING_BYTES (MAX_APDU-6)
+#define MAX_OCTET_STRING_BYTES 64
 #endif
 
 /*
@@ -237,52 +270,190 @@
 #define BACNET_SVC_RPM_A       1
 #define BACNET_SVC_DCC_A       1
 #define BACNET_SVC_RD_A        1
-#define BACNET_SVC_TS_A        1
+#define BACNET_SVC_TS_A        0
 #define BACNET_SVC_SERVER      0
 #define BACNET_USE_OCTETSTRING 1
 #define BACNET_USE_DOUBLE      1
 #define BACNET_USE_SIGNED      1
 #endif
 
-/* Do them one by one */
-#ifndef BACNET_SVC_I_HAVE_A     /* Do we send I_Have requests? */
-#define BACNET_SVC_I_HAVE_A 0
+#ifndef BACNET_CLIENT
+#define BACNET_CLIENT           0               // todo 3 move client functions out to their own library
 #endif
 
-#ifndef BACNET_SVC_WP_A /* Do we send WriteProperty requests? */
-#define BACNET_SVC_WP_A 0
+ // In linux, these can be (actually, are) defined in the makefile.
+
+ /* Do them one by one */
+//#ifndef BACNET_SVC_COV_B		/* EKH, I am only defining B for now, make A vs B more fine grained when next dealing with COVs */
+//#define BACNET_SVC_COV_B		1
+//#endif
+
+#ifndef BACNET_SVC_I_HAVE_A         /* Do we send I_Have requests? */
+#define BACNET_SVC_I_HAVE_A     0
 #endif
 
-#ifndef BACNET_SVC_RP_A /* Do we send ReadProperty requests? */
-#define BACNET_SVC_RP_A 0
+#ifndef BACNET_SVC_WP_A         /* Do we send WriteProperty requests? */
+#define BACNET_SVC_WP_A         0
+#endif
+
+#ifndef BACNET_SVC_RP_A         /* Do we send ReadProperty requests? */
+#define BACNET_SVC_RP_A         0
 #endif
 
 #ifndef BACNET_SVC_RPM_A        /* Do we send ReadPropertyMultiple requests? */
-#define BACNET_SVC_RPM_A 0
+#define BACNET_SVC_RPM_A        0
 #endif
 
 #ifndef BACNET_SVC_DCC_A        /* Do we send DeviceCommunicationControl requests? */
-#define BACNET_SVC_DCC_A 0
+#define BACNET_SVC_DCC_A        0
 #endif
 
-#ifndef BACNET_SVC_RD_A /* Do we send ReinitialiseDevice requests? */
-#define BACNET_SVC_RD_A 0
+#ifndef BACNET_SVC_RD_A         /* Do we send ReinitialiseDevice requests? */
+#define BACNET_SVC_RD_A         0
 #endif
 
-#ifndef BACNET_SVC_SERVER       /* Are we a pure server type device? */
-#define BACNET_SVC_SERVER 1
+#ifndef BACNET_SVC_TIME
+#define BACNET_SVC_TIME         1
 #endif
 
-#ifndef BACNET_USE_OCTETSTRING  /* Do we need any octet strings? */
-#define BACNET_USE_OCTETSTRING 0
+
+
+/* B-side (i.e. BACnet Server as opposed Client) services */
+
+#ifndef INTRINSIC_REPORTING_B
+#define INTRINSIC_REPORTING_B		1
 #endif
 
-#ifndef BACNET_USE_DOUBLE       /* Do we need any doubles? */
-#define BACNET_USE_DOUBLE 0
+#ifndef BACNET_SVC_FILE_B
+#define BACNET_SVC_FILE_B           1
 #endif
 
-#ifndef BACNET_USE_SIGNED       /* Do we need any signed integers */
-#define BACNET_USE_SIGNED 0
+#ifndef BACNET_SVC_RPM_B            /* Do we respond to Read Property Multiple requests? */
+#define BACNET_SVC_RPM_B            1
 #endif
 
+#ifndef BACNET_SVC_RR_B             /* Do we respond to Read Range requests? */
+#define BACNET_SVC_RR_B             1
 #endif
+
+#define BACNET_SVC_WPM_B            1
+
+// above
+//#ifndef INTRINSIC_REPORTING_B
+//#define INTRINSIC_REPORTING_B       1
+//#endif
+
+#ifndef BACNET_SVC_COV_B
+#define BACNET_SVC_COV_B            1
+#endif
+
+#ifndef BACNET_SVC_PRIVATE_TRANSFER
+#define BACNET_SVC_PRIVATE_TRANSFER 1
+#endif
+
+#ifndef BACNET_SVC_SERVER           /* Are we a pure server type device? */
+#define BACNET_SVC_SERVER           1
+#endif
+
+
+/* Other */
+
+#ifndef BACNET_USE_OCTETSTRING      /* Do we need any octet strings? */
+#define BACNET_USE_OCTETSTRING      1
+#endif
+
+#ifndef BACNET_USE_DOUBLE           /* Do we need any doubles? */
+#define BACNET_USE_DOUBLE           1
+#endif
+
+#ifndef BACNET_USE_SIGNED           /* Do we need any signed integers */
+#define BACNET_USE_SIGNED           1
+#endif
+
+
+/* And a similar method for optional BACnet Objects */
+
+#ifndef BACNET_USE_OBJECT_ANALOG_INPUT
+#define BACNET_USE_OBJECT_ANALOG_INPUT          1
+#endif
+
+
+#ifndef BACNET_USE_OBJECT_ANALOG_VALUE
+#define BACNET_USE_OBJECT_ANALOG_VALUE          1
+#endif
+
+#ifndef BACNET_USE_OBJECT_ANALOG_OUTPUT
+#define BACNET_USE_OBJECT_ANALOG_OUTPUT         1
+#endif
+
+#ifndef BACNET_USE_OBJECT_BINARY_INPUT
+#define BACNET_USE_OBJECT_BINARY_INPUT          1
+#endif
+
+#ifndef BACNET_USE_OBJECT_BINARY_VALUE
+#define BACNET_USE_OBJECT_BINARY_VALUE          1
+#endif
+
+#ifndef BACNET_USE_OBJECT_BINARY_OUTPUT
+#define BACNET_USE_OBJECT_BINARY_OUTPUT         1
+#endif
+
+#ifndef BACNET_USE_OBJECT_ALERT_ENROLLMENT
+#define BACNET_USE_OBJECT_ALERT_ENROLLMENT      0
+#endif
+
+#ifndef BACNET_USE_OBJECT_LIGHTING_OUTPUT
+#define BACNET_USE_OBJECT_LIGHTING_OUTPUT       0
+#endif
+
+#ifndef BACNET_USE_OBJECT_LOAD_CONTROL
+#define BACNET_USE_OBJECT_LOAD_CONTROL          1
+#endif
+
+#ifndef BACNET_USE_OBJECT_TRENDLOG
+#define BACNET_USE_OBJECT_TRENDLOG              1
+#endif
+
+#ifndef BACNET_USE_OBJECT_LIFE_SAFETY
+#define BACNET_USE_OBJECT_LIFE_SAFETY           1
+#endif
+
+#ifndef BACNET_USE_OBJECT_CHANNEL
+#define BACNET_USE_OBJECT_CHANNEL			    1
+#endif
+
+#ifndef BACNET_USE_OBJECT_SCHEDULE
+#define BACNET_USE_OBJECT_SCHEDULE			    1
+#endif
+
+#ifndef BACNET_USE_OBJECT_NOTIFICATION_CLASS
+#define BACNET_USE_OBJECT_NOTIFICATION_CLASS    1
+#endif
+
+
+
+// There are some cascading dependencies, check and resolve them here
+
+//#ifndef INTRINSIC_REPORTING_B
+//#if INTRINSIC_REPORTING_B == 1 || INTRINSIC_REPORTING_B == 1
+//#define INTRINSIC_REPORTING_B 0
+//#else
+//#define INTRINSIC_REPORTING_B 0
+//#endif
+//#endif
+
+// obsolete #define BAC_ROUTING                         0   // Switch to 1 only at "Virtual Devices" reference project stage/branch
+
+#define BACNET_SVC_LIST_MANIPULATION_B          0
+
+#if (BACNET_USE_OBJECT_ALERT_ENROLLMENT == 1) || (INTRINSIC_REPORTING_B == 1)
+#define BACNET_USE_OBJECT_NOTIFICATION_CLASS    1
+#define BACNET_USE_EVENT_HANDLING               1
+#endif
+
+//#if (BACNET_SVC_COV_BI_B == 1) || (BACNET_SVC_COV_AI_B == 1 )
+// above #define BACNET_SVC_COV_B                        1
+//#endif
+   
+#endif // CONFIG_H
+

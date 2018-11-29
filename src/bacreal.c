@@ -29,8 +29,22 @@
  This exception does not invalidate any other reasons why a work
  based on this file might be covered by the GNU General Public
  License.
- -------------------------------------------
-####COPYRIGHTEND####*/
+*
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
 
 #include <string.h>
 
@@ -46,6 +60,7 @@
 
 /* NOTE: byte order plays a role in decoding multibyte values */
 /* http://www.unixpapa.com/incnote/byteorder.html */
+// 2016.08.20 EKH: Found a conflict with BIG_ENDIAN in another library. Renaming for BACnet.
 #ifndef BACNET_STACK_BIG_ENDIAN
 #error Define BACNET_STACK_BIG_ENDIAN=0 or BACNET_STACK_BIG_ENDIAN=1 for BACnet Stack in compiler settings
 #endif

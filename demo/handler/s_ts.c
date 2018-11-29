@@ -21,7 +21,22 @@
 * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 *
-*********************************************************************/
+*****************************************************************************************
+*
+*   Modifications Copyright (C) 2017 BACnet Interoperability Testing Services, Inc.
+*
+*   July 1, 2017    BITS    Modifications to this file have been made in compliance
+*                           with original licensing.
+*
+*   This file contains changes made by BACnet Interoperability Testing
+*   Services, Inc. These changes are subject to the permissions,
+*   warranty terms and limitations above.
+*   For more information: info@bac-test.com
+*   For access to source code:  info@bac-test.com
+*          or      www.github.com/bacnettesting/bacnet-stack
+*
+****************************************************************************************/
+
 #include <stddef.h>
 #include <stdint.h>
 #include <errno.h>
@@ -45,6 +60,7 @@
 
 /** @file s_ts.c  Send TimeSync requests. */
 
+#if BACNET_SVC_TS_A
 /**
  * Sends a TimeSync message to a specific destination
  *
@@ -52,6 +68,7 @@
  * @param bdate - #BACNET_DATE
  * @param btime - #BACNET_TIME
  */
+
 void Send_TimeSync_Remote(
     BACNET_ADDRESS * dest,
     BACNET_DATE * bdate,
@@ -193,3 +210,5 @@ void Send_TimeSync_Device(void)
     Device_getCurrentDateTime(&local_time);
     Send_TimeSync(&local_time.date, &local_time.time);
 }
+
+#endif //#if BACNET_SVC_TS_A
