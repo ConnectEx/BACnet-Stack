@@ -25,10 +25,10 @@ Pick the branch of the phase that suits your application the best and start ther
 ## Phase (branch) name
 ###	Description
 
-###Shadow of Steve Kargs stack
+### Shadow of Steve Kargs stack
     Straight copy of Steve's latest release from https://sourceforge.net/projects/bacnet/
 
-###Compile MSVC
+### Compile MSVC
     * Add MSVC projects, solution, NO FURTHER CHANGES apart from getting MSVC to compile.
     * A note on the Microsoft solution layout (applies to this, and the rest of the branches)
         * In ports\win32\Microsoft Visual Studio\ there is a Microsoft Visual Studio Solution file (*.sln)that contains multiple projects
@@ -37,22 +37,22 @@ Pick the branch of the phase that suits your application the best and start ther
         * A common Visual Studion "properties" file ("BACnet Solution Settings.props") containing common settings, such as include paths, key #defines to be shared across all projects.
         * Individual MVS project files contain more specific project settings
 
-###Global Renames
+### Global Renames
     (This is not really a useful branch, use "Compile MSVC C++ branch as your starting point for BITS codebase")
     BITS copyright message
     NPDU -> NPCI
 
-###Syntax Fixups
+### Syntax Fixups
     (This is not really a useful branch, use "Compile MSVC C++ branch as your starting point for BITS codebase")
     Remove 'return'
     Remove unnecessary initializations
     { }
 
-###Compile C++
+### Compile C++
     Only uses C++ features for better type checking during compiles
     One can switch between projects within solution to run different examples
 
-###Feature Creep
+### Feature Creep
     Intent:
         Uses C++ Objects (only for BACnet Objects)
         This is the last 'single datalink, non routing, non virtual device' configuration.
@@ -75,11 +75,11 @@ Pick the branch of the phase that suits your application the best and start ther
                 ------
                 Status: 2017.10.01 Runs vs2017 - server, x64 debug
 
-###Feature Creep 2 - Consolidation
+### Feature Creep 2 - Consolidation
 	Intent was to commonise functions in readproperty and write property switches, but upon initial development, checks like array index as well as less than
 	expected common code, as well as the desire to reduce RAM for by using ROM made me cancel this approach 2018.10.24 
 
-###MultipleDatalinks
+### MultipleDatalinks
     Added dlcb, removed Tx buffers
     Note: This has a VERY NARROW use-case. A server device with a serial port and an Ethernet port, and the plugged in port 'goes live'
     All other dual-port applications have to be router applications..
@@ -92,10 +92,10 @@ Virtual Devices
     -- obsolete - there cannot be a concept of virtual devices without full routing.... Virtual Devices
     -- and the step between full routing (and one Application Entity) and full routing and one application entity and other virtual entities is so small we are not going to even bother. Roll it all up into "Full Routing" phase just before this one.
 
-###Full Routing (this is deprecated for now - see Full Routing C++)
+### Full Routing (this is deprecated for now - see Full Routing C++)
     Perhaps we will backfill a pure "C" profile of full routing one day
 
-###Full Routing C++
+### Full Routing C++
     And _this_ is where the action happens. Virtual devices, multiple datalinks, routing.
     Note, the projects server, readprom, readpropm, whois etc are NOT SUPPORTED in this phase! Only "bitsRouter" and bits/utils (etc) are...
 
